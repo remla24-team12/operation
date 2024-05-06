@@ -1,8 +1,11 @@
 # A1:
 
 ### Bram:
-Created PR:
-Approved PR:
+Created PRs:
+https://github.com/killB0x/remla24-team12/pull/5
+
+Approved PRs:
+https://github.com/killB0x/remla24-team12/pull/3
 
 
 ### Kris:
