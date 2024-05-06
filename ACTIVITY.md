@@ -6,6 +6,12 @@ Approved PR:
 
 
 ### Kris:
+Created PRs:
+https://github.com/killB0x/remla24-team12/pull/4
+https://github.com/killB0x/remla24-team12/pull/2
+
+Approved PRs:
+https://github.com/killB0x/remla24-team12/pull/3
 
 
 ### Nicolae:
@@ -20,3 +26,4 @@ Approved PRs:
 https://github.com/killB0x/remla24-team12/pull/2
 https://github.com/killB0x/remla24-team12/pull/4
 https://github.com/killB0x/remla24-team12/pull/5
+
