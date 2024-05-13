@@ -62,5 +62,7 @@ Approved PRs:
 
 ### Reinout:
 Created PRs:
+https://github.com/remla24-team12/model-service/pull/6
 
 Approved PRs:
+https://github.com/remla24-team12/model-service/pull/4
