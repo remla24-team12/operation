@@ -1,5 +1,14 @@
 # Links to other repositories:
-Assignment 1 (model-training): https://github.com/killB0x/remla24-team12
+For creating our application we decided to stick to the architecture proposed in the assignment:
+![](/assets/architecture.png)
+
+You can find the repositories for the respective components here:
+app (frontend & service): https://github.com/remla24-team12/app
+lib-version: https://github.com/remla24-team12/lib-version 
+
+model-service: https://github.com/remla24-team12/model-service  
+model-training (A1): https://github.com/remla24-team12/model-training
+lib-ml: https://github.com/remla24-team12/lib-ml 
 
 
 ## Comments for A1:
