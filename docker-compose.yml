@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  app-frontend:
+    image: ghcr.io/remla24-team12/frontend:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - app-service
+
+  app-service:
+    image: ghcr.io/remla24-team12/backend:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - model-service
+
+  model-service:
+    image: ghcr.io/remla24-team12/model-service:latest
+    ports:
+      - "5000:5000"
+
+networks:
+  default:
+    driver: bridge
