@@ -1,3 +1,6 @@
+# Running the application
+To run the applications, simply run docker-compose up
+
 # Links to other repositories:
 For creating our application we decided to stick to the architecture proposed in the assignment:
 ![](/assets/architecture.png)
