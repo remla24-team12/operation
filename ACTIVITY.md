@@ -51,8 +51,12 @@ https://github.com/remla24-team12/lib-ml/pull/2
 
 ### Kris:
 Created PRs:
+https://github.com/remla24-team12/app/pull/2
+https://github.com/remla24-team12/app/pull/3
+https://github.com/remla24-team12/lib-version/pull/2
 
 Approved PRs:
+https://github.com/remla24-team12/model-service/pull/3#event-12791141272
 
 
 ### Nicolae:
