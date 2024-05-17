@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: true
+  roles:
+    - common
+
+# - hosts: controller
+#   become: true
+#   roles:
+
+# - hosts: workers
+#   become: true
+#   roles:
