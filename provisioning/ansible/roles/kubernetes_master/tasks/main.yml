@@ -18,6 +18,14 @@
   args:
     creates: /etc/kubernetes/admin.conf
 
+- name: Create .kube directory for the vagrant user
+  file:
+    path: /home/vagrant/.kube
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: '0755'
+
 - name: Set up kubeconfig for the vagrant user
   copy:
     src: /etc/kubernetes/admin.conf
@@ -27,7 +35,32 @@
     group: vagrant
     mode: '0644'
 
+- name: Set KUBECONFIG environment variable
+  lineinfile:
+    path: /home/vagrant/.bashrc
+    line: 'export KUBECONFIG=/home/vagrant/.kube/config'
+    create: yes
+
+- name: Source .bashrc to update environment variables
+  shell: source /home/vagrant/.bashrc
+  args:
+    executable: /bin/bash
+
+- name: Wait for the Kubernetes API server to be available
+  shell: |
+    while ! nc -z localhost 6443; do
+      sleep 1
+    done
+  retries: 30
+  delay: 10
+  register: result
+  until: result is succeeded
+  args:
+    executable: /bin/bash
+
 - name: Install Calico network plugin
   shell: kubectl create -f https://docs.projectcalico.org/manifests/calico.yaml
+  environment:
+    KUBECONFIG: /home/vagrant/.kube/config
   args:
     executable: /bin/bash

@@ -22,14 +22,11 @@
   args:
     executable: /bin/bash
 
-
 - name: Add Kubernetes APT repository
   ansible.builtin.apt_repository:
     repo: "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /"
     state: present
     update_cache: yes
-
-
 
 - name: Install Kubernetes components
   apt:
@@ -51,3 +48,36 @@
     name: docker
     enabled: yes
     state: started
+
+- name: Disable swap
+  command: swapoff -a
+
+- name: Remove swap from fstab
+  mount:
+    name: none
+    path: /swapfile
+    fstype: swap
+    state: absent
+
+- name: Ensure required cgroups are enabled
+  ansible.builtin.sysctl:
+    name: 'net.bridge.bridge-nf-call-iptables'
+    value: 1
+    state: present
+    reload: yes
+
+- name: Ensure vagrant user exists
+  user:
+    name: vagrant
+    state: present
+    groups: sudo
+    append: yes
+
+- name: Ensure .kube directory exists for the vagrant user
+  file:
+    path: /home/vagrant/.kube
+    state: directory
+    owner: vagrant
+    group: vagrant
+    mode: '0755'
+

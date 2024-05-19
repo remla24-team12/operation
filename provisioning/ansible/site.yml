@@ -1,15 +1,18 @@
 ---
 - hosts: all
   become: yes
+  gather_facts: yes
   roles:
     - common
 
 - hosts: controller
   become: yes
+  gather_facts: yes
   roles:
     - kubernetes_master
 
 - hosts: workers
   become: yes
+  gather_facts: yes
   roles:
     - kubernetes_worker
