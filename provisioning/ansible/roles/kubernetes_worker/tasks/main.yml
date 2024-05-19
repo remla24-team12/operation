@@ -1,0 +1,11 @@
+---
+
+- name: Retrieve join command from master
+  shell: kubeadm token create --print-join-command
+  delegate_to: "{{ groups['controller'][0] }}"
+  run_once: true
+  register: join_command
+
+- name: Join the cluster
+  shell: "{{ join_command.stdout }}"
+  when: join_command.stdout is defined

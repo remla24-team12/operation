@@ -9,10 +9,18 @@ Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-24.04"
   config.vm.box_version = "202404.26.0"
 
+  # Worker nodes
+  NUM_WORKERS = 2
+  worker_names = (1..NUM_WORKERS).map { |i| "node#{i}" }
+
   # Ansible playbook
   config.vm.provision :ansible do |a|
     a.compatibility_mode = "2.0"
     a.playbook = "ansible/site.yml"
+    a.groups = {
+      "controller" => ["controller"],
+      "workers" => worker_names
+    }
   end
 
   # Provide the ssh keys, as to avoid password signin
@@ -27,7 +35,7 @@ Vagrant.configure("2") do |config|
     controller.vm.hostname = "controller"
     controller.vm.provider "virtualbox" do |vb|
       vb.memory = 4096
-      vb.cpus = 1
+      vb.cpus = 2
     end
     controller.vm.network "private_network", ip: "192.168.56.10"
 
@@ -46,8 +54,7 @@ Vagrant.configure("2") do |config|
   end
 
 
-  # Worker nodes
-  NUM_WORKERS = 2
+  
 
   (1..NUM_WORKERS).each do |i|
     config.vm.define "node#{i}" do |node|

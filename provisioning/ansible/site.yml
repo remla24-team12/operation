@@ -1,13 +1,15 @@
 ---
 - hosts: all
-  become: true
+  become: yes
   roles:
     - common
 
-# - hosts: controller
-#   become: true
-#   roles:
+- hosts: controller
+  become: yes
+  roles:
+    - kubernetes_master
 
-# - hosts: workers
-#   become: true
-#   roles:
+- hosts: workers
+  become: yes
+  roles:
+    - kubernetes_worker
