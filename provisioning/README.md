@@ -6,9 +6,9 @@ vagrant up
 ```
 
 The nodes should now be active on the following IP addresses:
-- controller : 192.168.56.10 
-- node1 : 192.168.56.11 
-- node2 : 192.168.56.12
+- controller: 192.168.56.10 
+- node1: 192.168.56.11 
+- node2: 192.168.56.12
 
 ## Ansible:
 

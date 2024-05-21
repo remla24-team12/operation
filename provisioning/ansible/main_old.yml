@@ -1,0 +1,109 @@
+---
+- name: Setup Kubernetes Cluster
+  hosts: all
+  become: true
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+        
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+- name: Setup Minikube Controller
+  hosts: controller
+  become: true
+  tasks:
+    - name: Download Minikube
+      get_url:
+        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        dest: /usr/local/bin/minikube
+        mode: '0755'
+
+    - name: Start Minikube
+      command: minikube start --driver=docker
+
+    - name: Install kubectl
+      apt:
+        name: kubectl
+        state: present
+        update_cache: yes
+
+    - name: Download Helm
+      get_url:
+        url: https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz
+        dest: /tmp/helm.tar.gz
+
+    - name: Extract Helm
+      unarchive:
+        src: /tmp/helm.tar.gz
+        dest: /usr/local/bin/
+        remote_src: yes
+        creates: /usr/local/bin/helm
+
+    - name: Move Helm Binary
+      command: mv /usr/local/bin/linux-amd64/helm /usr/local/bin/helm
+
+    - name: Add Helm Repositories
+      command: helm repo add {{ item.repo }} {{ item.url }}
+      loop:
+        - { repo: "prometheus-community", url: "https://prometheus-community.github.io/helm-charts" }
+        - { repo: "grafana", url: "https://grafana.github.io/helm-charts" }
+        - { repo: "kubernetes-dashboard", url: "https://kubernetes.github.io/dashboard/" }
+      register: helm_repos
+
+    - name: Update Helm Repositories
+      command: helm repo update
+      when: helm_repos is changed
+
+    - name: Install Prometheus
+      command: helm install prometheus prometheus-community/prometheus
+
+    - name: Install Grafana
+      command: helm install grafana grafana/grafana
+
+    - name: Install Kubernetes Dashboard
+      command: helm install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard
+
+    - name: Expose Prometheus via NodePort
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: prometheus
+            namespace: default
+          spec:
+            type: NodePort
+            ports:
+              - port: 80
+                targetPort: 9090
+                nodePort: 30090
+            selector:
+              app: prometheus
+
+    - name: Expose Grafana via NodePort
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: grafana
+            namespace: default
+          spec:
+            type: NodePort
+            ports:
+              - port: 80
+                targetPort: 3000
+                nodePort: 30030
+            selector:
+              app: grafana
