@@ -77,3 +77,41 @@ https://github.com/remla24-team12/model-service/pull/6
 
 Approved PRs:
 https://github.com/remla24-team12/model-service/pull/4
+
+# A1:
+
+### Bram:
+Created PRs:
+
+
+Approved PRs:
+
+
+
+### Kris:
+Created PRs:
+
+Approved PRs:
+
+
+
+### Nicolae:
+Created PRs:
+https://github.com/remla24-team12/model-service/pull/8
+https://github.com/remla24-team12/model-service/pull/7
+https://github.com/remla24-team12/app/pull/6/files
+https://github.com/remla24-team12/lib-version/pull/3
+https://github.com/remla24-team12/lib-ml/pull/6/files
+https://github.com/remla24-team12/lib-ml/pull/5/files
+Approved PRs:
+https://github.com/remla24-team12/operation/commit/af0450a1e9bfb8e89c134a2659366c67c5579ee5
+
+### Reinout:
+Created PRs:
+
+
+
+Approved PRs:
+
+
+
