@@ -1,9 +1,62 @@
 ---
-- name: Update apt package index
-  apt:
-    update_cache: yes
+- name: Setup Kubernetes with Minikube
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - conntrack
 
-- name: Install dependencies
-  apt:
-    name: ['curl', 'gnupg', 'apt-transport-https']
-    state: present
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start and enable Docker service
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
+
+    - name: Add user to Docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Get the latest version of kubectl
+      shell: "curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+      register: kubectl_version
+
+    - name: Download kubectl binary
+      get_url:
+        url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
+    - name: Install Minikube
+      command: >
+        curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        && chmod +x minikube
+        && sudo mv minikube /usr/local/bin/
+      args:
+        creates: /usr/local/bin/minikube
+
+    - name: Start Minikube
+      command: minikube start --driver=docker
+      environment:
+        CHANGE_MINIKUBE_NONE_USER: "true"
+
+    - name: Configure kubectl to use Minikube
+      command: kubectl config use-context minikube
