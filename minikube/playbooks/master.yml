@@ -138,17 +138,17 @@
     - name: Install Prometheus
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
-      command: helm install prometheus prometheus-community/prometheus --set server.service.type=NodePort
+      command: helm upgrade -i prometheus prometheus-community/prometheus --set server.service.type=NodePort
 
     - name: Install Grafana
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
-      command: helm install grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.port=3000
+      command: helm upgrade -i grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.port=3000
 
     - name: Install Kubernetes Dashboard
       environment:
         KUBECONFIG: /home/vagrant/.kube/config
-      command: helm install kubernetes-dashboard stable/kubernetes-dashboard --set service.type=NodePort --set service.externalPort=8080
+      command: helm upgrade -i kubernetes-dashboard stable/kubernetes-dashboard --set service.type=NodePort --set service.externalPort=8080
 
 - name: Configure kubectl on the host
   hosts: localhost
