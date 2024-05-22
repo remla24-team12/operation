@@ -1,0 +1,163 @@
+---
+- name: Setup Kubernetes Cluster with Minikube
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - conntrack
+        state: present
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker group exists
+      group:
+        name: docker
+        state: present
+
+    - name: Add vagrant user to the Docker group
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+
+    - name: Download Minikube
+      get_url:
+        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        dest: /usr/local/bin/minikube
+        mode: '0755'
+
+    - name: Get latest kubectl version
+      command: curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt
+      register: kubectl_version
+
+    - name: Download kubectl
+      get_url:
+        url: "https://storage.googleapis.com/kubernetes-release/release/{{ kubectl_version.stdout }}/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
+    - name: Download crictl
+      get_url:
+        url: https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.30.0/crictl-v1.30.0-linux-amd64.tar.gz
+        dest: /tmp/crictl-v1.30.0-linux-amd64.tar.gz
+
+    - name: Extract crictl
+      unarchive:
+        src: /tmp/crictl-v1.30.0-linux-amd64.tar.gz
+        dest: /usr/local/bin
+        remote_src: yes
+
+    - name: Make crictl executable
+      file:
+        path: /usr/local/bin/crictl
+        mode: '0755'
+
+- name: Start Minikube as non-root user
+  hosts: all
+  become: yes
+  become_user: "{{ ansible_user }}"
+  tasks:
+    - name: Make sure the docker group exists
+      group:
+        name: docker
+        state: present
+    - name: Add the current user to the docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+    - name: Reload to apply group changes
+      command: newgrp docker
+    - name: Start Minikube with docker driver
+      command: minikube start --driver=docker
+
+    - name: Wait for Kubernetes to be ready
+      command: minikube status --format='{{"{{"}}.Kubelet{{"}}"}}'
+      register: minikube_status
+      until: minikube_status.stdout == "Running"
+      retries: 10
+      delay: 15
+
+- name: Install Helm and deploy Kubernetes Applications
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Install Helm
+      get_url:
+        url: https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz
+        dest: /tmp/helm-v3.7.2-linux-amd64.tar.gz
+
+    - name: Extract Helm
+      unarchive:
+        src: /tmp/helm-v3.7.2-linux-amd64.tar.gz
+        dest: /tmp
+        remote_src: yes
+
+    - name: Move Helm binary
+      command: mv /tmp/linux-amd64/helm /usr/local/bin/helm
+
+    - name: Add Prometheus Community Helm repository
+      command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+    - name: Add Grafana Helm repository
+      command: helm repo add grafana https://grafana.github.io/helm-charts
+
+    - name: Add Helm stable repository
+      command: helm repo add stable https://charts.helm.sh/stable
+
+    - name: Update Helm repositories
+      command: helm repo update
+
+    - name: Ensure Prometheus is not already installed
+      shell: |
+        helm list --filter '^prometheus$' -q | grep -q '^prometheus$' && helm uninstall prometheus || echo "Prometheus not installed"
+      ignore_errors: yes
+
+    - name: Ensure Grafana is not already installed
+      shell: |
+        helm list --filter '^grafana$' -q | grep -q '^grafana$' && helm uninstall grafana || echo "Grafana not installed"
+      ignore_errors: yes
+
+    - name: Ensure Kubernetes Dashboard is not already installed
+      shell: |
+        helm list --filter '^kubernetes-dashboard$' -q | grep -q '^kubernetes-dashboard$' && helm uninstall kubernetes-dashboard || echo "Kubernetes Dashboard not installed"
+      ignore_errors: yes
+
+    - name: Install Prometheus
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: helm install prometheus prometheus-community/prometheus --set server.service.type=NodePort
+
+    - name: Install Grafana
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: helm install grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.port=3000
+
+    - name: Install Kubernetes Dashboard
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: helm install kubernetes-dashboard stable/kubernetes-dashboard --set service.type=NodePort --set service.externalPort=8080
+
+- name: Configure kubectl on the host
+  hosts: localhost
+  tasks:
+    - name: Create kube config directory
+      file:
+        path: ~/.kube
+        state: directory
+        mode: '0755'
+
+    - name: Copy kube config
+      shell: minikube kubeconfig | tee ~/.kube/config

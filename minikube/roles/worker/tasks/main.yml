@@ -1,0 +1,7 @@
+---
+- name: Join Kubernetes cluster
+  command: "{{ hostvars['master']['kubeadm_join_command'] }}"
+  register: kubeadm_join_result
+  until: kubeadm_join_result.rc == 0
+  retries: 5
+  delay: 10
