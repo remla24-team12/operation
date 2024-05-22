@@ -78,7 +78,7 @@ https://github.com/remla24-team12/model-service/pull/6
 Approved PRs:
 https://github.com/remla24-team12/model-service/pull/4
 
-# A1:
+# A3:
 
 ### Bram:
 Created PRs:
@@ -108,10 +108,9 @@ https://github.com/remla24-team12/operation/commit/af0450a1e9bfb8e89c134a2659366
 
 ### Reinout:
 Created PRs:
-
-
+https://github.com/remla24-team12/operation/pull/3
 
 Approved PRs:
-
+https://github.com/remla24-team12/operation/pull/2
 
 
