@@ -93,6 +93,7 @@ Created PRs:
 https://github.com/remla24-team12/operation/pull/5
 
 Approved PRs:
+Non these week due to issues with minikube
 
 
 
