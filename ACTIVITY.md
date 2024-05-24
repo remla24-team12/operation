@@ -82,10 +82,10 @@ https://github.com/remla24-team12/model-service/pull/4
 
 ### Bram:
 Created PRs:
-
+https://github.com/remla24-team12/operation/pull/4
 
 Approved PRs:
-
+https://github.com/remla24-team12/operation/pull/3
 
 
 ### Kris:
