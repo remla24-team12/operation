@@ -1,0 +1,63 @@
+---
+- hosts: workers
+  become: true
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Install necessary packages
+      apt:
+        name:
+          - curl
+          - ca-certificates
+        state: present
+
+    - name: Update /etc/hosts for controller
+      lineinfile:
+        path: /etc/hosts
+        line: "192.168.56.10 controller"
+        create: yes
+    # - name: Check if K3s is installed
+    #   stat:
+    #     path: /usr/local/bin/k3s
+    #   register: k3s_installed
+    - name: Fetch K3s node token from controller
+      copy:
+        src: /vagrant/node-token
+        dest: /tmp/node-token
+        remote_src: true
+      # when: not k3s_installed.stat.exists
+
+    - name: Install K3s
+      shell: |
+        curl -sfL https://get.k3s.io | K3S_URL=https://192.168.56.10:6443 K3S_TOKEN=$(cat /vagrant/node-token) sh -
+      register: k3s_install
+      changed_when: "'installed successfully' in k3s_install.stdout"
+      # when: not k3s_installed.stat.exists
+
+    # - name: Stop and disable k3s-server service
+    #   systemd:
+    #     name: k3s
+    #     state: stopped
+    #     enabled: no
+    #   ignore_errors: true
+
+    # - name: Ensure port 6444 is free
+    #   shell: |
+    #     fuser -k 6444/tcp || true
+    #   ignore_errors: true
+
+    
+
+    # - name: Check if the node is already part of a cluster
+    #   shell: kubectl get nodes
+    #   register: node_part_of_cluster
+    #   ignore_errors: True
+    #   changed_when: false
+
+    # - name: Join K3s cluster
+    #   shell: sudo k3s agent --server https://192.168.56.10:6443 --token $(cat /tmp/node-token)
+    #   # when: node_part_of_cluster.rc != 0
