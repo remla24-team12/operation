@@ -1,0 +1,96 @@
+---
+- hosts: controller
+  become: true
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Install necessary packages
+      apt:
+        name:
+          - curl
+          - ca-certificates
+        state: present
+
+    - name: Check if K3s is installed
+      command: systemctl is-active k3s
+      register: k3s_active
+      failed_when: k3s_active.rc not in [0, 3]
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install K3s
+      shell: |
+        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --node-ip 192.168.56.10 --advertise-address 192.168.56.10 --write-kubeconfig-mode 644" sh -
+      register: k3s_install
+      changed_when: "'installed successfully' in k3s_install.stdout"
+
+
+    - name: Ensure K3s server is running
+      systemd:
+        name: k3s
+        state: started
+        enabled: yes
+
+    - name: Wait for K3s server to start
+      wait_for:
+        port: 6443
+        host: 127.0.0.1
+        delay: 10
+        timeout: 120
+
+    - name: Fetch K3s node token
+      slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: k3s_token
+
+    - name: Save K3s token to a file
+      copy:
+        content: "{{ k3s_token.content | b64decode }}"
+        dest: /vagrant/node-token
+
+    # - name: Check if Helm is installed
+    #   command: helm version --short
+    #   register: helm_installed
+    #   ignore_errors: true
+    #   changed_when: false
+
+    # - name: Install Helm
+    #   shell: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+    #   when: helm_installed.rc != 0
+
+    # - name: Check if Helm repo is added
+    #   command: helm repo list
+    #   register: helm_repo_list
+    #   changed_when: false
+    #   ignore_errors: true
+
+    # - name: Add Prometheus Helm chart repo
+    #   command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    #   when: "'prometheus-community' not in helm_repo_list.stdout"
+
+    # - name: Update Helm repositories
+    #   command: helm repo update
+
+    # - name: Check if Prometheus is installed
+    #   command: helm status prometheus -n monitoring
+    #   register: prometheus_installed
+    #   ignore_errors: true
+    #   changed_when: false
+
+    # - name: Install Prometheus and Grafana
+    #   command: helm install prometheus prometheus-community/kube-prometheus-stack --create-namespace --namespace monitoring
+    #   when: prometheus_installed.rc != 0
+
+    # - name: Check if Kubernetes Dashboard is installed
+    #   command: kubectl get svc/kubernetes-dashboard -n kubernetes-dashboard
+    #   register: dashboard_installed
+    #   ignore_errors: true
+    #   changed_when: false
+
+    # - name: Install Kubernetes Dashboard
+    #   command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
+    #   when: dashboard_installed.rc != 0
