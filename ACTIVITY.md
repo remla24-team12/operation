@@ -132,3 +132,11 @@ https://github.com/remla24-team12/model-training/pull/6
 Approved PRs:
 https://github.com/remla24-team12/operation/pull/6
 
+### Nicolae:
+
+Created PRs:
+https://github.com/remla24-team12/operation/pull/6/files
+https://github.com/remla24-team12/model-service/pull/10/files
+Approved PRs:
+https://github.com/remla24-team12/model-training/pull/8
+
