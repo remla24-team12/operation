@@ -1,5 +1,35 @@
-# Running the application
+# Running the application using docker-compose
 To run the applications, simply run docker-compose up
+
+# Running the application using kubernetes
+## Generate an ssh key
+To generate an ssh key, run the following command:
+```bash
+ssh-keygen 
+```
+
+Save the key to ```provisioning/keys/vagrant_ssh_key``` and ```provisioning/keys/vagrant_ssh_key.pub```
+
+
+## Install ansible, vagrant and virtualbox
+To install ansible, vagrant and virtualbox, run the following commands:
+```bash
+sudo apt-get install ansible
+sudo apt-get install vagrant
+sudo apt-get install virtualbox
+```
+
+# Running the application
+To run the application, simply run the following command:
+```bash
+vagrant up
+```
+
+## Initializing kubernetes
+To initialize kubernetes, run the following command:
+```bash
+ansible-playbook -i provisioning/hosts provisioning/playbooks/init-cluster.yml
+```
 
 # Links to other repositories:
 For creating our application we decided to stick to the architecture proposed in the assignment:

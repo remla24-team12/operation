@@ -1,76 +1,42 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-
-
+IMAGE_NAME = "ubuntu/jammy64"
+N = 1
 
 Vagrant.configure("2") do |config|
-  
-  # Base Box (and version)
-  config.vm.box = "bento/ubuntu-24.04"
-  config.vm.box_version = "202404.26.0"
+    config.ssh.insert_key = true
 
-  # Ansible playbook
-  config.vm.provision :ansible do |a|
-    a.compatibility_mode = "2.0"
-    a.playbook = "ansible/site.yml"
-  end
-
-  # Provide the ssh keys, as to avoid password signin
-  private_key_path = "./keys/vagrant_ssh_key"
-  public_key_path = "./keys/vagrant_ssh_key.pub"
-  public_key = File.read(public_key_path)
-  
-
-  # ------ VM Nodes ------
-  # Control node
-  config.vm.define "controller" do |controller|
-    controller.vm.hostname = "controller"
-    controller.vm.provider "virtualbox" do |vb|
-      vb.memory = 4096
-      vb.cpus = 1
+    config.vm.provider "virtualbox" do |v|
+        v.memory = 2048
+        v.cpus = 2
     end
-    controller.vm.network "private_network", ip: "192.168.56.10"
 
-    controller.vm.provision "file", source: private_key_path, destination: "/home/vagrant/.ssh/id_rsa"
-    controller.vm.provision :shell, :inline => "
-      echo 'Copying SSH public key to controller'
-      mkdir -p /home/vagrant/.ssh
-      chmod 700 /home/vagrant/.ssh
-      echo '#{public_key}' >> /home/vagrant/.ssh/authorized_keys
-      chmod 600 /home/vagrant/.ssh/id_rsa /home/vagrant/.ssh/authorized_keys
-      echo 'Host 192.168.*.*' >> /home/vagrant/.ssh/config
-      echo 'StrictHostKeyChecking no' >> /home/vagrant/.ssh/config
-      echo 'UserKnownHostsFile /dev/null' >> /home/vagrant/.ssh/config
-      chmod 600 /home/vagrant/.ssh/config
-    ", privileged: false
-  end
+    config.vm.define "controller-1" do |master|
+        master.vm.box = IMAGE_NAME
+        master.vm.network "private_network", ip: "192.168.56.10"
 
 
-  # Worker nodes
-  NUM_WORKERS = 2
 
-  (1..NUM_WORKERS).each do |i|
-    config.vm.define "node#{i}" do |node|
-      node.vm.hostname = "node#{i}"
-      node.vm.provider "virtualbox" do |vb|
-        vb.memory = 6144
-        vb.cpus = 2
-      end
-      node.vm.network "private_network", ip: "192.168.56.#{10 + i}"
-
-      node.vm.provision "file", source: private_key_path, destination: "/home/vagrant/.ssh/id_rsa"
-      node.vm.provision :shell, :inline => "
-        echo 'Copying SSH public key to node#{i}'
-        mkdir -p /home/vagrant/.ssh
-        chmod 700 /home/vagrant/.ssh
-        echo '#{public_key}' >> /home/vagrant/.ssh/authorized_keys
-        chmod 600 /home/vagrant/.ssh/id_rsa /home/vagrant/.ssh/authorized_keys
-        echo 'Host 192.168.*.*' >> /home/vagrant/.ssh/config
-        echo 'StrictHostKeyChecking no' >> /home/vagrant/.ssh/config
-        echo 'UserKnownHostsFile /dev/null' >> /home/vagrant/.ssh/config
-        chmod 600 /home/vagrant/.ssh/config
-      ", privileged: false
+        master.vm.hostname = "controller-1"
+        master.vm.provision "ansible" do |ansible|
+            ansible.playbook = "playbooks/master.yml"
+            ansible.inventory_path = "inventory/hosts"
+            ansible.extra_vars = {
+                node_ip: "192.168.50.10",
+            }
+        end
     end
-  end
 
+    (1..N).each do |i|
+        config.vm.define "node-#{i}" do |node|
+            node.vm.box = IMAGE_NAME
+            node.vm.network "private_network", ip: "192.168.56.#{i + 10}"
+            node.vm.hostname = "node-#{i}"
+            node.vm.provision "ansible" do |ansible|
+                ansible.playbook = "playbooks/master.yml"
+                ansible.inventory_path = "inventory/hosts"
+                ansible.extra_vars = {
+                    node_ip: "192.168.50.#{i + 10}",
+                }
+            end
+        end
+    end
 end
