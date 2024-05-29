@@ -116,3 +116,10 @@ Approved PRs:
 https://github.com/remla24-team12/operation/pull/2
 
 
+# A4:
+
+### Kris:
+
+Approved PRs:
+https://github.com/remla24-team12/model-training/pull/7#pullrequestreview-2085602256
+
