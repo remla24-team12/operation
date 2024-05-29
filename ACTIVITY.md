@@ -118,6 +118,14 @@ https://github.com/remla24-team12/operation/pull/2
 
 # A4:
 
+### Bram:
+Created PRs:
+https://github.com/remla24-team12/model-training/pull/5
+https://github.com/remla24-team12/model-training/pull/9
+
+Approved PRs:
+https://github.com/remla24-team12/model-training/pull/6
+
 ### Kris:
 
 Approved PRs:
