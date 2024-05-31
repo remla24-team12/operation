@@ -128,6 +128,9 @@ https://github.com/remla24-team12/model-training/pull/6
 
 ### Kris:
 
+Created PRs:
+https://github.com/remla24-team12/operation/pull/5
+
 Approved PRs:
 https://github.com/remla24-team12/model-training/pull/7#pullrequestreview-2085602256
 
