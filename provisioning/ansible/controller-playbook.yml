@@ -52,6 +52,23 @@
         content: "{{ k3s_token.content | b64decode }}"
         dest: /vagrant/node-token
 
+    - name: Install Helm
+      shell: |
+        curl -fsSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+      args:
+        creates: /usr/local/bin/helm
+
+    - name: Initialize Helm and add repositories (if required)
+      block:
+        - name: Add stable repository
+          shell: helm repo add stable https://charts.helm.sh/stable
+        - name: Update helm repositories
+          shell: helm repo update
+
+    - name: Deploy application using Helm
+      shell: helm upgrade --install myapp-release /vagrant/remla --set service.type=NodePort,service.nodePort=30007 --kubeconfig=/etc/rancher/k3s/k3s.yaml
+      register: helm_deploy
+      changed_when: "'deployed' in helm_deploy.stdout"
     # - name: Check if Helm is installed
     #   command: helm version --short
     #   register: helm_installed

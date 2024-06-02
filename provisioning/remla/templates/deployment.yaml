@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/remla24-team12/backend:latest
+        ports:
+        - containerPort: 3000
+      nodeSelector:
+        kubernetes.io/hostname: worker3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: ghcr.io/remla24-team12/frontend:latest
+        ports:
+        - containerPort: 8080
+      nodeSelector:
+        kubernetes.io/hostname: worker2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: model-service
+  template:
+    metadata:
+      labels:
+        app: model-service
+    spec:
+      containers:
+      - name: model-service
+        image: ghcr.io/remla24-team12/model-service:v0.1.53
+        ports:
+        - containerPort: 5000
+      nodeSelector:
+        kubernetes.io/hostname: worker1
