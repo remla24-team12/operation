@@ -153,6 +153,14 @@ https://github.com/remla24-team12/model-training/pull/8
 
 
 # A5:
+### Nicolae:
+
+Created PRs:
+https://github.com/remla24-team12/operation/pull/7
+Approved PRs:
+https://github.com/remla24-team12/model-service/pull/11
+https://github.com/remla24-team12/app/pull/7
+
 
 ### Reinout:
 
