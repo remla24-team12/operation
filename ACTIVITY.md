@@ -158,18 +158,23 @@ https://github.com/remla24-team12/model-training/pull/12
 Approved PRs:
 https://github.com/remla24-team12/model-service/pull/11
 
+### Nicolae:
+Created PRs:
+https://github.com/remla24-team12/operation/pull/7
+
+Approved PRs:
+https://github.com/remla24-team12/model-service/pull/11
+https://github.com/remla24-team12/app/pull/7
+
+### Reinout:
+Created PRs:
+https://github.com/remla24-team12/model-service/pull/11
+
+Approved PRs:
+https://github.com/remla24-team12/operation/pull/7
+
 ### Kris:
 Created PRs:
 
 Approved PRs:
-
-
-### Reinout:
-Created PRs:
-
-Approved PRs:
-
-### Nicolae:
-Created PRs:
-
-Approved PRs:
+https://github.com/remla24-team12/model-service/pull/11#pullrequestreview-2094646617
