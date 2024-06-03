@@ -127,7 +127,6 @@ Approved PRs:
 https://github.com/remla24-team12/model-training/pull/6
 
 ### Kris:
-
 Created PRs:
 https://github.com/remla24-team12/operation/pull/5
 
@@ -136,7 +135,6 @@ https://github.com/remla24-team12/model-training/pull/7#pullrequestreview-208560
 
 
 ### Reinout:
-
 Created PRs:
 https://github.com/remla24-team12/model-training/pull/6
 
@@ -144,10 +142,34 @@ Approved PRs:
 https://github.com/remla24-team12/operation/pull/6
 
 ### Nicolae:
-
 Created PRs:
 https://github.com/remla24-team12/operation/pull/6/files
 https://github.com/remla24-team12/model-service/pull/10/files
+
 Approved PRs:
 https://github.com/remla24-team12/model-training/pull/8
 
+# A5:
+
+### Bram:
+Created PRs:
+https://github.com/remla24-team12/model-training/pull/12
+
+Approved PRs:
+https://github.com/remla24-team12/model-service/pull/11
+
+### Kris:
+Created PRs:
+
+Approved PRs:
+
+
+### Reinout:
+Created PRs:
+
+Approved PRs:
+
+### Nicolae:
+Created PRs:
+
+Approved PRs:
