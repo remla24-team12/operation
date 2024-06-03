@@ -10,20 +10,20 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: backend-service
+            name: backend-service  # Updated to correct service name
             port:
               number: 3000
       - path: /frontend
         pathType: Prefix
         backend:
           service:
-            name: frontend-service
+            name: frontend-service  # Updated to correct service name
             port:
               number: 8080
       - path: /model
         pathType: Prefix
         backend:
           service:
-            name: model-service
+            name: model-service  # This name is already correct
             port:
               number: 5000

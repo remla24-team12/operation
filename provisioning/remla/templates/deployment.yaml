@@ -58,7 +58,7 @@ spec:
     spec:
       containers:
       - name: model-service
-        image: ghcr.io/remla24-team12/model-service:v0.1.53
+        image: ghcr.io/remla24-team12/model-service:latest
         ports:
         - containerPort: 5000
       nodeSelector:
