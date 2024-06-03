@@ -151,3 +151,11 @@ https://github.com/remla24-team12/model-service/pull/10/files
 Approved PRs:
 https://github.com/remla24-team12/model-training/pull/8
 
+# A5:
+
+### Kris:
+
+Created PRs:
+
+Approved PRs:
+https://github.com/remla24-team12/model-service/pull/11#pullrequestreview-2094646617
