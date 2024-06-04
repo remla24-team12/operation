@@ -1,0 +1,225 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: ghcr.io/remla24-team12/backend:latest
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/remla24-team12/frontend:latest
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: model-service
+  template:
+    metadata:
+      labels:
+        app: model-service
+    spec:
+      containers:
+        - name: model-service
+          image: ghcr.io/remla24-team12/model-service:latest
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: model-service
+spec:
+  selector:
+    app: model-service
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-ingress
+spec:
+  type: LoadBalancer
+  selector:
+    istio: ingressgateway
+  ports:
+    - port: 80
+      name: http
+    - port: 443
+      name: https
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-ingress
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  template:
+    metadata:
+      annotations:
+        # Select the gateway injection template (rather than the default sidecar template)
+        inject.istio.io/templates: gateway
+      labels:
+        # Set a unique label for the gateway. This is required to ensure Gateways can select this workload
+        istio: ingressgateway
+        # Enable gateway injection. If connecting to a revisioned control plane, replace with "istio.io/rev: revision-name"
+        sidecar.istio.io/inject: "true"
+    spec:
+      # Allow binding to all ports (such as 80 and 443)
+      securityContext:
+        sysctls:
+          - name: net.ipv4.ip_unprivileged_port_start
+            value: "0"
+      containers:
+        - name: istio-proxy
+          image: auto # The image will automatically update each time the pod starts.
+          # Drop all privileges, allowing to run as non-root
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsUser: 1337
+            runAsGroup: 1337
+---
+# Set up roles to allow reading credentials for TLS
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: istio-ingressgateway-sds
+  namespace: istio-ingress
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: istio-ingressgateway-sds
+  namespace: istio-ingress
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: istio-ingressgateway-sds
+subjects:
+  - kind: ServiceAccount
+    name: default
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: frontend-service
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - istio-gateway
+  http:
+    - match:
+        - uri:
+            exact: /
+      route:
+        - destination:
+            host: frontend-service
+            port:
+              number: 8080
+    - match:
+        - uri:
+            prefix: /api
+      route:
+        - destination:
+            host: backend-service
+            port:
+              number: 3000
+    - match:
+        - uri:
+            prefix: /model
+      route:
+        - destination:
+            host: model-service
+            port:
+              number: 5000

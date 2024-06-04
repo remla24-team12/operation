@@ -11,92 +11,38 @@
           - curl
           - gnupg
           - lsb-release
+          - conntrack
+        state: present
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker group exists
+      group:
+        name: docker
         state: present
 
-    - name: Download Kubernetes repository GPG key
-      command: |
-        curl -fsSL -H "User-Agent: Mozilla/5.0" https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key -o /tmp/kubernetes-apt-key.gpg
+    - name: Add vagrant user to the Docker group
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
 
-    - name: Print GPG key
-      command: cat /tmp/kubernetes-apt-key.gpg
+    - name: Download k3s
+      get_url:
+          url: https://github.com/k3s-io/k3s/releases/download/v1.30.0%2Bk3s1/k3s
 
-    - name: Create keyrings directory if not exists
+    - name: Move k3s binary
+      command: mv k3s /usr/local/bin/k3s
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Make k3s binary executable
       file:
-        path: /etc/apt/keyrings
-        state: directory
-        mode: '0755'
+          path: /usr/local/bin/k3s
+          mode: '0755'
 
-    - name: Save Kubernetes GPG key to keyring
-      command: gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-apt-key.gpg
-      become: yes
-
-    - name: Create Kubernetes repository list file
-      copy:
-        content: 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /'
-        dest: /tmp/kubernetes.list
-
-    - name: Move Kubernetes repository list to sources.list.d
-      command: mv /tmp/kubernetes.list /etc/apt/sources.list.d/kubernetes.list
-      become: yes
-    - name: Update apt package index
-      apt:
-        update_cache: yes
-
-    - name: Install kubelet, kubeadm, and kubectl
-      apt:
-        name:
-          - kubelet
-          - kubeadm
-          - kubectl
-        state: present
-        allow_unauthenticated: yes
-
-    - name: Hold kubelet, kubeadm, and kubectl at current version
-      command: sudo apt-mark hold kubelet kubeadm kubectl
-- name: Setup CRI-O
-  hosts: controller,node
-  become: yes
-  tasks:
-    - name: Install necessary dependencies
-      apt:
-        name:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - gnupg
-          - lsb-release
-        state: present
-        update_cache: yes
-
-    - name: Download CRI-O repository GPG key
-      command: curl -fsSL https://pkgs.k8s.io/addons:/cri-o:/prerelease:/main/deb/Release.key -o /tmp/crio-apt-key.gpg
-
-    - name: Add CRI-O repository GPG key
-      command: sudo gpg --batch --yes --dearmor -o /usr/share/keyrings/crio-archive-keyring.gpg /tmp/crio-apt-key.gpg
-
-    - name: Add CRI-O repository
-      copy:
-        content: |
-          deb [signed-by=/usr/share/keyrings/crio-archive-keyring.gpg] https://pkgs.k8s.io/addons:/cri-o:/prerelease:/main/deb/ /
-        dest: /etc/apt/sources.list.d/crio.list
-
-    - name: Update apt cache
-      command: sudo apt-get update
-
-    - name: Install CRI-O
-      apt:
-        name: cri-o
-        state: present
-
-    - name: Enable and start CRI-O
-      systemd:
-        name: crio
-        enabled: yes
-        state: started
-
-    - name: Ensure net.ipv4.ip_forward is set to 1
-      sysctl:
-        name: net.ipv4.ip_forward
-        value: 1
-        state: present
-        reload: yes

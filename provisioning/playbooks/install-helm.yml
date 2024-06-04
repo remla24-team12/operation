@@ -1,0 +1,102 @@
+- name: Install Helm and deploy Kubernetes Applications
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Install Helm
+      get_url:
+        url: https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz
+        dest: /tmp/helm-v3.7.2-linux-amd64.tar.gz
+
+    - name: Extract Helm
+      unarchive:
+        src: /tmp/helm-v3.7.2-linux-amd64.tar.gz
+        dest: /tmp
+        remote_src: yes
+
+    - name: Move Helm binary
+      command: mv /tmp/linux-amd64/helm /usr/local/bin/helm
+
+    - name: Add Prometheus Community Helm repository
+      command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+    - name: Add Grafana Helm repository
+      command: helm repo add grafana https://grafana.github.io/helm-charts
+
+    - name: Add Helm stable repository
+      command: helm repo add stable https://charts.helm.sh/stable
+
+    - name: Add Istio Helm repository
+      command: helm repo add istio https://istio-release.storage.googleapis.com/charts
+
+    - name: Update Helm repositories
+      command: helm repo update
+
+    - name: Ensure Prometheus is not already installed
+      shell: |
+        helm list --filter '^prometheus$' -q | grep -q '^prometheus$' && helm uninstall prometheus || echo "Prometheus not installed"
+      ignore_errors: yes
+
+    - name: Ensure Grafana is not already installed
+      shell: |
+        helm list --filter '^grafana$' -q | grep -q '^grafana$' && helm uninstall grafana || echo "Grafana not installed"
+      ignore_errors: yes
+
+    - name: Ensure Kubernetes Dashboard is not already installed
+      shell: |
+        helm list --filter '^kubernetes-dashboard$' -q | grep -q '^kubernetes-dashboard$' && helm uninstall kubernetes-dashboard || echo "Kubernetes Dashboard not installed"
+      ignore_errors: yes
+
+    - name: Install Prometheus
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: helm upgrade -i prometheus prometheus-community/prometheus --set server.service.type=NodePort
+
+    - name: Install Grafana
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: helm upgrade -i grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.port=3000
+
+    - name: Install Kubernetes Dashboard
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: helm upgrade -i kubernetes-dashboard stable/kubernetes-dashboard --set service.type=NodePort --set service.externalPort=8080
+
+    - name: Check if namespace exists
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: kubectl get namespaces istio-system
+      register: namespace_check
+      ignore_errors: yes
+
+    - name: Create a namespace for Istio
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: kubectl create namespace istio-system
+      when: namespace_check.rc != 0
+
+    - name: Install Istio
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: helm upgrade -i istio-base istio/base -n istio-system --set defaultRevision=default
+
+    - name: Install Istio Discovery
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command:  helm upgrade -i istiod istio/istiod -n istio-system --version 1.22 --set istio_cni.enabled=true --wait
+
+    - name: Check if namespace exists
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: kubectl get namespaces istio-ingress
+      register: namespace_check
+      ignore_errors: yes
+
+    - name: Create a namespace for Istio Ingress Gateway
+      environment:
+        KUBECONFIG: /home/vagrant/.kube/config
+      command: kubectl create namespace istio-ingress
+      when: namespace_check.rc != 0
+
+    - name: Install Istio Ingress Gateway
+      environment:
+      command: helm upgrade -i istio-ingress istio/gateway -n istio-system --wait

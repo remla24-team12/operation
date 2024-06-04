@@ -31,6 +31,13 @@ To initialize kubernetes, run the following command:
 ansible-playbook -i provisioning/hosts provisioning/playbooks/init-cluster.yml
 ```
 
+## Set kubectl context
+To set the kubectl context, run the following command:
+```bash
+export KUBECONFIG=/tmp/.kube/config
+```
+
+
 # Links to other repositories:
 For creating our application we decided to stick to the architecture proposed in the assignment:
 ![](/assets/architecture.png)
