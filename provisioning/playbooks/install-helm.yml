@@ -19,14 +19,14 @@
     - name: Add Prometheus Community Helm repository
       command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 
-    - name: Add Grafana Helm repository
-      command: helm repo add grafana https://grafana.github.io/helm-charts
-
-    - name: Add Helm stable repository
-      command: helm repo add stable https://charts.helm.sh/stable
-
-    - name: Add Istio Helm repository
-      command: helm repo add istio https://istio-release.storage.googleapis.com/charts
+#    - name: Add Grafana Helm repository
+#      command: helm repo add grafana https://grafana.github.io/helm-charts
+#
+#    - name: Add Helm stable repository
+#      command: helm repo add stable https://charts.helm.sh/stable
+#
+#    - name: Add Istio Helm repository
+#      command: helm repo add istio https://istio-release.storage.googleapis.com/charts
 
     - name: Update Helm repositories
       command: helm repo update
@@ -36,67 +36,57 @@
         helm list --filter '^prometheus$' -q | grep -q '^prometheus$' && helm uninstall prometheus || echo "Prometheus not installed"
       ignore_errors: yes
 
-    - name: Ensure Grafana is not already installed
-      shell: |
-        helm list --filter '^grafana$' -q | grep -q '^grafana$' && helm uninstall grafana || echo "Grafana not installed"
-      ignore_errors: yes
-
-    - name: Ensure Kubernetes Dashboard is not already installed
-      shell: |
-        helm list --filter '^kubernetes-dashboard$' -q | grep -q '^kubernetes-dashboard$' && helm uninstall kubernetes-dashboard || echo "Kubernetes Dashboard not installed"
-      ignore_errors: yes
+#    - name: Ensure Grafana is not already installed
+#      shell: |
+#        helm list --filter '^grafana$' -q | grep -q '^grafana$' && helm uninstall grafana || echo "Grafana not installed"
+#      ignore_errors: yes
+#
+#    - name: Ensure Kubernetes Dashboard is not already installed
+#      shell: |
+#        helm list --filter '^kubernetes-dashboard$' -q | grep -q '^kubernetes-dashboard$' && helm uninstall kubernetes-dashboard || echo "Kubernetes Dashboard not installed"
+#      ignore_errors: yes
 
     - name: Install Prometheus
       environment:
-        KUBECONFIG: /home/vagrant/.kube/config
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
       command: helm upgrade -i prometheus prometheus-community/prometheus --set server.service.type=NodePort
 
-    - name: Install Grafana
-      environment:
-        KUBECONFIG: /home/vagrant/.kube/config
-      command: helm upgrade -i grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.port=3000
-
-    - name: Install Kubernetes Dashboard
-      environment:
-        KUBECONFIG: /home/vagrant/.kube/config
-      command: helm upgrade -i kubernetes-dashboard stable/kubernetes-dashboard --set service.type=NodePort --set service.externalPort=8080
+#    - name: Install Grafana
+#      environment:
+#        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+#      command: helm upgrade -i grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.port=3000
+#
+#    - name: Install Kubernetes Dashboard
+#      environment:
+#        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+#      command: helm upgrade -i kubernetes-dashboard stable/kubernetes-dashboard --set service.type=NodePort --set service.externalPort=8080
 
     - name: Check if namespace exists
       environment:
-        KUBECONFIG: /home/vagrant/.kube/config
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
       command: kubectl get namespaces istio-system
       register: namespace_check
       ignore_errors: yes
 
     - name: Create a namespace for Istio
       environment:
-        KUBECONFIG: /home/vagrant/.kube/config
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
       command: kubectl create namespace istio-system
       when: namespace_check.rc != 0
 
+    - name: Download Istio
+      shell: curl -L https://istio.io/downloadIstio | sh -
+      args:
+        executable: /bin/bash
+
     - name: Install Istio
+      shell: istio-1.22.0/bin/istioctl install --set profile=demo -y
       environment:
-        KUBECONFIG: /home/vagrant/.kube/config
-      command: helm upgrade -i istio-base istio/base -n istio-system --set defaultRevision=default
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
-    - name: Install Istio Discovery
+    - name: Label the namespace for Istio injection
+      shell: kubectl label namespace default istio-injection=enabled
+      args:
+        executable: /bin/bash
       environment:
-        KUBECONFIG: /home/vagrant/.kube/config
-      command:  helm upgrade -i istiod istio/istiod -n istio-system --version 1.22 --set istio_cni.enabled=true --wait
-
-    - name: Check if namespace exists
-      environment:
-        KUBECONFIG: /home/vagrant/.kube/config
-      command: kubectl get namespaces istio-ingress
-      register: namespace_check
-      ignore_errors: yes
-
-    - name: Create a namespace for Istio Ingress Gateway
-      environment:
-        KUBECONFIG: /home/vagrant/.kube/config
-      command: kubectl create namespace istio-ingress
-      when: namespace_check.rc != 0
-
-    - name: Install Istio Ingress Gateway
-      environment:
-      command: helm upgrade -i istio-ingress istio/gateway -n istio-system --wait
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml

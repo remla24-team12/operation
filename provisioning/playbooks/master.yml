@@ -32,17 +32,7 @@
         groups: docker
         append: yes
 
-    - name: Download k3s
-      get_url:
-          url: https://github.com/k3s-io/k3s/releases/download/v1.30.0%2Bk3s1/k3s
 
-    - name: Move k3s binary
-      command: mv k3s /usr/local/bin/k3s
-      args:
-        creates: /usr/local/bin/k3s
 
-    - name: Make k3s binary executable
-      file:
-          path: /usr/local/bin/k3s
-          mode: '0755'
+
 
