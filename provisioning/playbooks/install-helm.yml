@@ -80,7 +80,7 @@
         executable: /bin/bash
 
     - name: Install Istio
-      shell: istio-1.22.0/bin/istioctl install --set profile=demo -y
+      shell: istio-1.22.1/bin/istioctl install --set profile=demo -y
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 

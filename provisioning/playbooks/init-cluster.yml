@@ -10,7 +10,7 @@
     - name: Install k3s server
       environment:
         INSTALL_K3S_FORCE_RESTART: "true"
-      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --tls-san 192.168.56.10 --node-external-ip 192.168.56.10 --write-kubeconfig-mode 644" sh -
+      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --tls-san 192.168.56.10 --node-external-ip 192.168.56.10 --write-kubeconfig-mode 644 --disable=traefik" sh -
       register: k3s_server_output
 
     - name: Start k3s server
@@ -23,9 +23,20 @@
           delay: 10
           timeout: 300
 
+    - name: Create .kube directory for admin user
+      file:
+        path: /home/{{ ansible_user }}/.kube
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Get kube config
+      shell: |
+        k3s kubectl config view --raw > /home/vagrant/.kube/config
     - name: Fetch k3s config from remote machine
       fetch:
-          src: /etc/rancher/k3s/k3s.yaml
+          src: /home/vagrant/.kube/config
           dest: /tmp/.kube/config
           flat: yes
           mode: '0777'

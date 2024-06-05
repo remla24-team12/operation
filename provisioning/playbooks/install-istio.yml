@@ -4,8 +4,8 @@
   tasks:
     - name: Export KUBECONFIG
       shell: export KUBECONFIG=/home/vagrant/.kube/config
-    - name: Download Istio
-      shell: curl -L https://istio.io/downloadIstio | sudo sh -
+    - name: Download Istio to home directory
+      shell: curl -L https://istio.io/downloadIstio | sh -
 
     - name: Ensure net.ipv4.ip_forward is set to 1
       sysctl:
@@ -16,7 +16,7 @@
 
 
     - name: Install Istio ctl
-      shell: ./home/vagrant/istio-1.22.0/bin/istioctl install -c /home/vagrant/.kube/config -y --set profile=default
+      shell: ./home/vagrant/istio-1.22.1/bin/istioctl install -c /home/vagrant/.kube/config -y --set profile=default
 
     - name: Enable Istio sidecar injection
       command: kubectl label namespace default istio-injection=enabled --overwrite
