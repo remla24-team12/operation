@@ -4,13 +4,13 @@
   become: yes
   tasks:
     - name: Stop k3s server if running
-      command: sudo systemctl stop k3s
+      command: /usr/local/bin/k3s-uninstall.sh
       ignore_errors: yes
 
     - name: Install k3s server
       environment:
         INSTALL_K3S_FORCE_RESTART: "true"
-      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --tls-san 192.168.56.10 --node-external-ip 192.168.56.10 --write-kubeconfig-mode 644 --disable=traefik" sh -
+      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --tls-san 192.168.56.10 --node-external-ip 192.168.56.10 --write-kubeconfig-mode 644 --disable=traefik --flannel-external-ip --kube-apiserver-arg external-hostname=192.168.56.10" sh -
       register: k3s_server_output
 
     - name: Start k3s server
@@ -79,14 +79,31 @@
         group: "{{ ansible_user }}"
         mode: '0777'
 
-    - name: Stop k3s agent if running
-      command: sudo systemctl stop k3s-agent
+    - name: Create .kube directory for admin user
+      file:
+        path: /home/{{ ansible_user }}/.kube
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Copy kube config to user's home directory
+      copy:
+        src: /tmp/.kube/config
+        dest: /home/{{ ansible_user }}/.kube/config
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0777'
+
+    - name: Stop k3s server if running
+      command: /usr/local/bin/k3s-agent-uninstall.sh
       ignore_errors: yes
+
 
     - name: Install k3s agent
       environment:
         INSTALL_K3S_FORCE_RESTART: "true"
-      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent --server https://192.168.56.10:6443 --token $(cat /home/{{ ansible_user }}/k3s_node_token)" sh -
+      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent --server https://192.168.56.10:6443 --node-label worker=true --flannel-iface enp0s8 --token $(cat /home/{{ ansible_user }}/k3s_node_token)" sh -
       register: k3s_agent_output
 
 
