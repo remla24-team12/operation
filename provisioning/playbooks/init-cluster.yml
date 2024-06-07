@@ -44,9 +44,12 @@
     - name: Fetch k3s config from remote machine
       fetch:
           src: /home/vagrant/.kube/config
+          # Change this path to the path where you want to store the kubeconfig file
           dest: /tmp/.kube/config
           flat: yes
           mode: '0777'
+
+
 
 #    - name: Edit ip address in file
 #      replace:
@@ -57,6 +60,7 @@
     - name: Copy node token from remote machine
       fetch:
           src: /var/lib/rancher/k3s/server/node-token
+          # Change this path to the path where you want to store the kubeconfig file
           dest: /tmp/k3s_node_token
           flat: yes
           mode: '0777'
