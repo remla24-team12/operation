@@ -85,7 +85,7 @@
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 
     - name: Label the namespace for Istio injection
-      shell: kubectl label namespace default istio-injection=enabled
+      shell: kubectl label namespace default istio-injection=enabled --overwrite
       args:
         executable: /bin/bash
       environment:
