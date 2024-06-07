@@ -3,6 +3,13 @@
   hosts: controller
   become: yes
   tasks:
+    - name: Ensure net.ipv4.ip_forward is set to 1
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+        state: present
+        reload: yes
+
     - name: Stop k3s server if running
       command: /usr/local/bin/k3s-uninstall.sh
       ignore_errors: yes
@@ -71,6 +78,13 @@
   hosts: node
   become: yes
   tasks:
+    - name: Ensure net.ipv4.ip_forward is set to 1
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+        state: present
+        reload: yes
+
     - name: Copy k3s node token to user's home directory
       copy:
         src: /tmp/k3s_node_token
