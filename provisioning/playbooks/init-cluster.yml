@@ -17,7 +17,7 @@
     - name: Install k3s server
       environment:
         INSTALL_K3S_FORCE_RESTART: "true"
-      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --tls-san 192.168.56.10 --node-external-ip 192.168.56.10 --write-kubeconfig-mode 644 --disable=traefik --flannel-external-ip --kube-apiserver-arg external-hostname=192.168.56.10" sh -
+      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --tls-san 192.168.56.10 --flannel-backend=wireguard-native --node-external-ip 192.168.56.10 --write-kubeconfig-mode 644 --disable=traefik --flannel-external-ip --kube-apiserver-arg external-hostname=192.168.56.10" sh -
       register: k3s_server_output
 
     - name: Start k3s server
@@ -117,7 +117,7 @@
     - name: Install k3s agent
       environment:
         INSTALL_K3S_FORCE_RESTART: "true"
-      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent --server https://192.168.56.10:6443 --node-label worker=true --flannel-iface enp0s8 --token $(cat /home/{{ ansible_user }}/k3s_node_token)" sh -
+      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent --server https://192.168.56.10:6443 --node-external-ip=192.168.56.11 --node-label worker=true --flannel-iface enp0s8 --token $(cat /home/{{ ansible_user }}/k3s_node_token)" sh -
       register: k3s_agent_output
 
 
