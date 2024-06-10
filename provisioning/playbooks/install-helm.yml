@@ -61,32 +61,3 @@
 #        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
 #      command: helm upgrade -i kubernetes-dashboard stable/kubernetes-dashboard --set service.type=NodePort --set service.externalPort=8080
 
-    - name: Check if namespace exists
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      command: kubectl get namespaces istio-system
-      register: namespace_check
-      ignore_errors: yes
-
-    - name: Create a namespace for Istio
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      command: kubectl create namespace istio-system
-      when: namespace_check.rc != 0
-
-    - name: Download Istio
-      shell: curl -L https://istio.io/downloadIstio | sh -
-      args:
-        executable: /bin/bash
-
-    - name: Install Istio
-      shell: istio-1.22.1/bin/istioctl install --set profile=demo -y
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-
-    - name: Label the namespace for Istio injection
-      shell: kubectl label namespace default istio-injection=enabled --overwrite
-      args:
-        executable: /bin/bash
-      environment:
-        KUBECONFIG: /etc/rancher/k3s/k3s.yaml

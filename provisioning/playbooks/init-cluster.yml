@@ -41,11 +41,17 @@
     - name: Get kube config
       shell: |
         k3s kubectl config view --raw > /home/vagrant/.kube/config
+
+    - name: Create .kube directory on Ansible host
+      file:
+          path: ./.kube
+          state: directory
+          mode: '0755'
     - name: Fetch k3s config from remote machine
       fetch:
           src: /home/vagrant/.kube/config
           # Change this path to the path where you want to store the kubeconfig file
-          dest: /tmp/.kube/config
+          dest: ./.kube/config
           flat: yes
           mode: '0777'
 
@@ -61,7 +67,7 @@
       fetch:
           src: /var/lib/rancher/k3s/server/node-token
           # Change this path to the path where you want to store the kubeconfig file
-          dest: /tmp/k3s_node_token
+          dest: ./.kube/k3s_node_token
           flat: yes
           mode: '0777'
 
@@ -91,7 +97,7 @@
 
     - name: Copy k3s node token to user's home directory
       copy:
-        src: /tmp/k3s_node_token
+        src: ./.kube/k3s_node_token
         dest: /home/{{ ansible_user }}/k3s_node_token
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
@@ -107,7 +113,7 @@
 
     - name: Copy kube config to user's home directory
       copy:
-        src: /tmp/.kube/config
+        src: ./.kube/config
         dest: /home/{{ ansible_user }}/.kube/config
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
