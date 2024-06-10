@@ -178,3 +178,12 @@ Created PRs:
 
 Approved PRs:
 https://github.com/remla24-team12/model-service/pull/11#pullrequestreview-2094646617
+
+
+# A6:
+### Reinout:
+Created PRs:
+https://github.com/remla24-team12/operation/pull/8
+
+Approved PRs:
+https://github.com/remla24-team12/operation/pull/10#
