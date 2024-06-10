@@ -41,18 +41,3 @@ Afterwards the following stages are executed:
 % https://lucid.app/lucidchart/38c9ce70-2d27-459d-b58a-c52e3883af58/edit?beaconFlowId=119EFCC8C64C2A8A&invitationId=inv_871bb54d-8a09-4c35-afbd-f00ea69222e8&page=0_0#
 
 \subsection{Container Image}
-The release of container images is similar across the different services in our application with some variation in cases where we require secretes to access parts of it. We have three images that we use in our deployment: \emph{model-service}, \emph{app-frontend} and \emph{app-backend}. The general workflow for the images is:
-\begin{itemize}
-    \item \textbf{Fetch secrets}: Fetch GitHub stored as files from the release workflow
-    \item \textbf{Copy app files}: Copy all the files of the application alongside the secrets.
-    \item \textbf{Install dependencies}: Install the dependencies using either npm or pipenv.
-    \item \textbf{Expose ports}: Expose the ports on which the applications run.
-    \item \textbf{Run the application}: Run the command to start the applications.
-\end{itemize}
-We only need to copy secrets for \emph{app-frontend} and \emph{model-service}. In the case of \emph{frontend} we need an authentication token to use in the .npmrc file in order to be able to use the library. In the case of \emph{model-service} we need to use login credentials to the google drive where we host our dvc pipeline data, since we are using the DVC live library to fetch the machine learning model. The current way of handling secrets is not secure, since one could simply enter the docker file and take a look at the secret files. For the scope of the project, we consider this to be enough. The general release workflow of the images is similar to the lib-version and looks like this:
-\begin{itemize}
-    \item \textbf{Get latest tag}: Retrieve the tag created in the versioning workflow.
-    \item \textbf{Write secrets to file}: Write the secrets from GitHub secret environment variables to files.
-    \item \textbf{Log in to GitHub Container Registry}: Provide the token for login
-    \item \textbf{Build and publish package}: Builds the docker image and publishes it to GitHub Packages using the authentication token provided through a secret and the newly updated version which was bumped.
-\end{itemize}
