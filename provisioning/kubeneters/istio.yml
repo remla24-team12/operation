@@ -25,7 +25,7 @@ spec:
   http:
     - match:
         - uri:
-            prefix: "/"
+            prefix: "/app"
       route:
         - destination:
             host: app-frontend
@@ -47,3 +47,20 @@ spec:
             host: model-service
             port:
               number: 5000
+    - match:
+        - uri:
+            prefix: "/metrics"
+      route:
+        - destination:
+            host: prometheus-server
+            port:
+              number: 80
+
+    - match:
+        - uri:
+            prefix: "/grafana"
+      route:
+        - destination:
+            host: grafana
+            port:
+              number: 3000
