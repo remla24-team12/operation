@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-frontend
+spec:
+  selector:
+    app: app-frontend
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30002
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-frontend
+  template:
+    metadata:
+      labels:
+        app: app-frontend
+    spec:
+      containers:
+        - name: app-frontend
+          image: ghcr.io/remla24-team12/frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: VUE_APP_API_URL
+              value: "http://app-service:3000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-service
+spec:
+  selector:
+      app: app-service
+  ports:
+      - port: 3000
+        targetPort: 3000
+        nodePort: 30003
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+          app: app-service
+    template:
+        metadata:
+          labels:
+              app: app-service
+        spec:
+          containers:
+              - name: app-service
+                image: ghcr.io/remla24-team12/backend:latest
+                imagePullPolicy: Always
+                ports:
+                    - containerPort: 3000
+                env:
+                  - name: MODEL_SERVICE_URL
+                    value: "http://model-service:5000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: model-service
+spec:
+    selector:
+        app: model-service
+    ports:
+        - port: 5000
+          targetPort: 5000
+          nodePort: 30004
+    type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: model-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: model-service
+    template:
+        metadata:
+            labels:
+                app: model-service
+        spec:
+            containers:
+                - name: model-service
+                  image: ghcr.io/remla24-team12/model-service:latest
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 5000
+---
