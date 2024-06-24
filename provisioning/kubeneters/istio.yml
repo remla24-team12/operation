@@ -84,3 +84,13 @@ spec:
       labels:
         version: v2
 ---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: app-service-destination
+spec:
+    host: app-service
+    trafficPolicy:
+        tls:
+            mode: DISABLE
+---

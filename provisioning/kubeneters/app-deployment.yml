@@ -35,7 +35,7 @@ spec:
             - containerPort: 8080
           env:
             - name: VUE_APP_API_URL
-              value: "http://192.168.56.10/api"
+              value: "http://192.168.56.10"
             - name: VUE_APP_PUBLIC_PATH
               value: "/app"
 ---
@@ -63,7 +63,7 @@ spec:
             - containerPort: 8080
           env:
             - name: VUE_APP_API_URL
-              value: "http://192.168.56.10/api"
+              value: "http://192.168.56.10"
             - name: VUE_APP_PUBLIC_PATH
               value: "/app"
 ---
