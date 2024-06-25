@@ -20,24 +20,19 @@
     - name: Add Kubernetes Dashboard Helm repository
       command: helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 
+    - name: Add NGINX Ingress repository
+      command: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
     - name: Update Helm repositories
       command: helm repo update
 
+    - name: Install NGINX Ingress Controller using Helm
+      shell: helm install nginx-ingress ingress-nginx/ingress-nginx --kubeconfig /etc/rancher/k3s/k3s.yaml
 
     - name: Ensure Prometheus is not already installed
       shell: |
         helm list --filter '^prometheus$' -q | grep -q '^prometheus$' && helm uninstall prometheus || echo "Prometheus not installed"
       ignore_errors: yes
-
-#    - name: Ensure Grafana is not already installed
-#      shell: |
-#        helm list --filter '^grafana$' -q | grep -q '^grafana$' && helm uninstall grafana || echo "Grafana not installed"
-#      ignore_errors: yes
-#
-#    - name: Ensure Kubernetes Dashboard is not already installed
-#      shell: |
-#        helm list --filter '^kubernetes-dashboard$' -q | grep -q '^kubernetes-dashboard$' && helm uninstall kubernetes-dashboard || echo "Kubernetes Dashboard not installed"
-#      ignore_errors: yes
 
     - name: Install Prometheus
       environment:
@@ -47,10 +42,9 @@
     - name: Install Grafana
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      command: helm upgrade -i grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.port=3000 --set grafana.grafana.ini.server.root_url='http://192.168.56.10/grafana'   --set grafana.grafana.ini.server.serve_from_sub_path=true
+      command: helm upgrade -i grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.port=3000 --set grafana.grafana.ini.server.root_url='http://192.168.56.10/grafana' --set grafana.grafana.ini.server.serve_from_sub_path=true
 
     - name: Install Kubernetes Dashboard
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      command: helm upgrade -i kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --set service.type=NodePort --set service.externalPort=8080
-
+      command: helm upgrade -i kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --

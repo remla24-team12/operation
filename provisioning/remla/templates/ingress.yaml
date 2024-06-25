@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /backend
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service  # Ensure this service name is correct
+            port:
+              number: 3000
+      - path: /frontend
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service  # Ensure this service name is correct
+            port:
+              number: 8080
+      - path: /model
+        pathType: Prefix
+        backend:
+          service:
+            name: model-service  # Ensure this service name is correct
+            port:
+              number: 5000

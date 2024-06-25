@@ -28,7 +28,7 @@ vagrant up
 ## Initializing kubernetes
 To initialize kubernetes, run the following command:
 ```bash
-ansible-playbook -i provisioning/hosts provisioning/playbooks/init-cluster.yml
+sudo ansible-playbook -i provisioning/hosts provisioning/playbooks/init-cluster.yml
 ```
 
 ## Set kubectl context
