@@ -52,7 +52,7 @@ kubectl apply -f kubernetes/app-deployment.yml
 ## Deploy istio gateway
 To deploy the istio gateway, run the following command:
 ```bash
-kubectl apply -f kubernetes/istio.yml
+kubectl apply -f kubernetes/istio-gateway.yml
 ```
 
 # Links to other repositories:
