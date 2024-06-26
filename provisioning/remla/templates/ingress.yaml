@@ -3,31 +3,30 @@ kind: Ingress
 metadata:
   name: example-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-
+    nginx.ingress.kubernetes.io/rewrite-target: /$1$2
 spec:
   ingressClassName: nginx
   rules:
   - http:
       paths:
-      - path: /backend
-        pathType: Prefix
+      - path: /backend/()(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
-            name: backend-service  # Ensure this service name is correct
+            name: backend-service
             port:
               number: 3000
-      - path: /frontend
-        pathType: Prefix
+      - path: /(frontend/)(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
-            name: frontend-service  # Ensure this service name is correct
+            name: frontend-service
             port:
               number: 8080
-      - path: /model
-        pathType: Prefix
+      - path: /model/()(.*)
+        pathType: ImplementationSpecific
         backend:
           service:
-            name: model-service  # Ensure this service name is correct
+            name: model-service
             port:
               number: 5000

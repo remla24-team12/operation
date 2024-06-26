@@ -15,10 +15,14 @@ spec:
       containers:
       - name: backend
         image: ghcr.io/remla24-team12/backend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
+        env:
+          - name: MODEL_SERVICE_URL
+            value: "http://192.168.56.10/model"
       nodeSelector:
-        kubernetes.io/hostname: node-2
+        kubernetes.io/hostname: node-1
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -37,10 +41,16 @@ spec:
       containers:
       - name: frontend
         image: ghcr.io/remla24-team12/frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
+        env:
+          - name: VUE_APP_PUBLIC_PATH
+            value: "/frontend/"
+          - name: VUE_APP_API_URL
+            value: "http://192.168.56.10/backend"
       nodeSelector:
-        kubernetes.io/hostname: node-1
+        kubernetes.io/hostname: node-3
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -59,7 +69,8 @@ spec:
       containers:
       - name: model-service
         image: ghcr.io/remla24-team12/model-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
       nodeSelector:
-        kubernetes.io/hostname: node-3
+        kubernetes.io/hostname: node-2
