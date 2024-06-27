@@ -2,7 +2,32 @@
 % using best practices and tools. Document how your pipeline is set up and the decisions you had to make to configure your project (tools, design, workarounds, and so on). This should come along with a description of your pipeline, its different steps, the tasks you have automated, which artefacts are being created, and so on.
 
 \section{ML Pipeline}
-TODO
+As described previously, the aim of the \texttt{model-training} repository is to automate the process of training and publishing the model. However, setting up Continuous Integration, Continuous Delivery and Continuous Deployment proves to be more challenging than for regular software applications. 
+
+\subsection{Configuration Tools}
+For this reason additional configuration tools are required. For example, how can we perform version control for datasets and models? Or how can we detect code smells specific to Machine Learning code?
+In order to solve these problems we make use of the tools:
+
+\subsubsection{Poetry:}
+Often repositories contain a \texttt{requirements.txt} as a method of managing dependencies. However, there is still a possibility that different collaborators are using different versions of the dependencies. {\color{blue} \href{https://python-poetry.org/}{Poetry}} is a tool which can sole this issue. It resolves dependencies before installation using a lock file to ensure compatibility across different environments. Another advantage of Poetry is the direct integration of virtual environment management. This will reduce the number of steps in the workflow. \\
+Initially, we used {\color{blue} \href{https://pipenv.pypa.io/en/latest/}{Pipenv}} instead of Poetry for dependency management, however, we had issues with the Pipenv virtual environment when setting up the pipeline. For this reason we decided to switch.
+
+\subsubsection{DVC:} \label{sec:ml-pipeline:dvc}
+It is inconvenient to store large files directly in a Repository. To solve this, we use {\color{blue} \href{https://dvc.org/}{DVC}} to track large file such as datasets and models instead of Git. DVC's integration with Google Drive allows us to store these large files there. Additionally, this feature allows us to track changes to datasets and revert to previous versions if necessary. \\
+Another advantage of DVC is the pipeline management. We can define stages in the project's workflow, such as data preprocessing, training, and evaluation. DVC automates the workflow by detecting changes and re-running only the impacted stages.
+
+\subsubsection{Pylint \& dslinter:} \label{sec:ml-pipeline:lint}
+Another problem of Machine Learning applications is code quality. As stated by Zhang et al. \cite{zhang2022code} "There is a lack of guidelines for code quality in machine learning applications. In particular, code smells have rarely been studied in this domain".
+Therefore, we configure a linter to detect the code smells identified by Zhang et al. \\
+As a basis, {\color{blue} \href{https://pylint.pycqa.org/en/latest/index.html}{Pylint}} serves as a linter for regular Python projects. We add a {\color{blue} \href{https://github.com/remla24-team12/model-training/blob/main/.pylintrc}{.pylintrc}} file in which we can configure custom rules. For a proper Machine Learning configuration we use {\color{blue} \href{https://github.com/SERG-Delft/dslinter}{dslinter}}. This is a Pylint plugin which helps ensure code quality specifically for Machine Learning. Dslinter provides a {\color{blue} \href{https://github.com/SERG-Delft/dslinter/blob/main/docs/pylint-configuration-examples/pylintrc-for-ml-projects/.pylintrc}{.pylintrc}}, which we used a basis. \\
+% TODO: Explain why we didn't use any of the other linters: flake8, Bandit, etc.
+
+
+\subsubsection{Pytest:}
+In order to test different aspects of the model, we use {\color{blue} \href{https://pytest.org}{Pytest}} to create test suites. Please see the following section for more information about testing.
+
+\subsection{Workflow}
+
 
 \begin{figure*}
     \centering
