@@ -55,6 +55,12 @@ To deploy the istio gateway, run the following command:
 kubectl apply -f kubernetes/istio-gateway.yml
 ```
 
+## To deploy the ratelimiter
+To deploy the ratelimiter, run the following command:
+```bash
+kubectl apply -f kubernetes/ratelimiter.yml
+```
+
 # Links to other repositories:
 For creating our application we decided to stick to the architecture proposed in the assignment:
 ![](/assets/architecture.png)
