@@ -23,13 +23,14 @@ sudo apt-get install virtualbox
 # Running the application
 To run the application, simply run the following command:
 ```bash
+cd provisioning
 vagrant up
 ```
 
 ## Initializing kubernetes
 To initialize kubernetes, run the following command:
 ```bash
-sudo ansible-playbook -i provisioning/hosts provisioning/playbooks/init-cluster.yml
+sudo ansible-playbook -i /inventory/hosts /playbooks/init-cluster.yml
 ```
 
 ## Set kubectl context
@@ -51,7 +52,7 @@ ansible-playbook -i provisioning/hosts provisioning/playbooks/install-helm.yml
 ```
 
 ## Run helm deployment
-There are two different scripts for deployment: remla-ingress and remla-istio. 
+There are two different scripts for deployment: remla-ingress and remla-istio.
 If istio has been installed run:
 ```bash
 ansible-playbook -i provisioning/hosts provisioning/playbooks/deploy-helm-chart-istio.yml
@@ -82,7 +83,7 @@ You can run /provisioning/rate_limiting_test.sh to test whether the rate limiter
 The following paths can be used when running ingress:
 Frontend app:  192.168.56.10/frontend/
 Backend app:   192.168.56.10/backend/
-Model service: 192.168.56.10/model/       
+Model service: 192.168.56.10/model/
 
 # Istio paths
 The following paths can be used when running istio:
@@ -105,8 +106,8 @@ For creating our application we decided to stick to the architecture proposed in
 
 You can find the repositories for the respective components here:
 - app (frontend & service): https://github.com/remla24-team12/app
-- lib-version: https://github.com/remla24-team12/lib-version 
+- lib-version: https://github.com/remla24-team12/lib-version
 
-- model-service: https://github.com/remla24-team12/model-service  
+- model-service: https://github.com/remla24-team12/model-service
 - model-training (A1): https://github.com/remla24-team12/model-training
-- lib-ml: https://github.com/remla24-team12/lib-ml 
+- lib-ml: https://github.com/remla24-team12/lib-ml
