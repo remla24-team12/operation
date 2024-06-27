@@ -1,32 +1,46 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
+IMAGE_NAME = "ubuntu/jammy64"
+N = 2
 
 Vagrant.configure("2") do |config|
-  # Set the SSH key insertion to false
-  config.ssh.insert_key = false
+    config.ssh.insert_key = true
 
-  # Define the controller
-  config.vm.define "controller" do |controller|
-    controller.vm.box = "ubuntu/bionic64"
-    controller.vm.hostname = "controller"
-    controller.vm.network "private_network", ip: "192.168.56.10"
-    controller.vm.provision :ansible do |ansible|
-      ansible.playbook = "ansible/controller-playbook.yml"
-      ansible.inventory_path = "inventory"
+    config.vm.provider "virtualbox" do |v|
+        v.memory = 4096
+        v.cpus = 1
     end
-  end
 
-  # Define three worker machines
-  (1..3).each do |i|
-    config.vm.define "worker#{i}" do |worker|
-      worker.vm.box = "ubuntu/bionic64"
-      worker.vm.hostname = "worker#{i}"
-      worker.vm.network "private_network", ip: "192.168.56.#{10 + i}"
-      worker.vm.provision :ansible do |ansible|
-        ansible.playbook = "ansible/worker-playbook.yml"
-        ansible.inventory_path = "inventory"
-      end
+    config.vm.define "controller-1" do |master|
+        master.vm.box = IMAGE_NAME
+        master.vm.network "private_network", ip: "192.168.56.10"
+
+        master.vm.network "forwarded_port", guest: 6443, host: 6443
+
+
+
+        master.vm.hostname = "controller-1"
+        master.vm.provision "ansible" do |ansible|
+            ansible.playbook = "playbooks/master.yml"
+            ansible.inventory_path = "inventory/hosts"
+            ansible.extra_vars = {
+                node_ip: "192.168.50.10",
+            }
+        end
     end
-  end
 
+    (1..N).each do |i|
+        config.vm.define "node-#{i}" do |node|
+            node.vm.box = IMAGE_NAME
+
+            node.vm.network "private_network", ip: "192.168.56.#{i + 10}"
+
+            node.vm.hostname = "node-#{i}"
+            node.vm.provision "ansible" do |ansible|
+                ansible.playbook = "playbooks/master.yml"
+                ansible.inventory_path = "inventory/hosts"
+                ansible.extra_vars = {
+                    node_ip: "192.168.50.#{i + 10}",
+                }
+            end
+        end
+    end
 end

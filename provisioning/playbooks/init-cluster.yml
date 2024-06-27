@@ -1,0 +1,159 @@
+---
+- name: Initialize Kubernetes cluster
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Ensure net.ipv4.ip_forward is set to 1
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+        state: present
+        reload: yes
+
+    - name: Stop k3s server if running
+      command: /usr/local/bin/k3s-uninstall.sh
+      ignore_errors: yes
+
+    - name: Install k3s server
+      environment:
+        INSTALL_K3S_FORCE_RESTART: "true"
+      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --tls-san 192.168.56.10 --flannel-backend=wireguard-native --node-external-ip 192.168.56.10 --write-kubeconfig-mode 644 --disable=traefik --flannel-external-ip --kube-apiserver-arg external-hostname=192.168.56.10" sh -
+      register: k3s_server_output
+
+    - name: Start k3s server
+      command: sudo systemctl start k3s
+      ignore_errors: yes
+
+    - name: Wait for k3s server to start
+      wait_for:
+          port: 6443
+          delay: 10
+          timeout: 300
+
+    - name: Create .kube directory for admin user
+      file:
+        path: /home/{{ ansible_user }}/.kube
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Get kube config
+      shell: |
+        k3s kubectl config view --raw > /home/vagrant/.kube/config
+
+    - name: Create .kube directory on Ansible host
+      file:
+          path: ./.kube
+          state: directory
+          mode: '0755'
+    - name: Fetch k3s config from remote machine
+      fetch:
+          src: /home/vagrant/.kube/config
+          # Change this path to the path where you want to store the kubeconfig file
+          dest: ./.kube/config
+          flat: yes
+          mode: '0777'
+
+
+
+#    - name: Edit ip address in file
+#      replace:
+#          path: /tmp/.kube/config
+#          regexp: 'server: https://127.0.0.1:6443'
+#          replace: 'server: https://192.168.56.10:6443'
+    
+    - name: Copy node token from remote machine
+      fetch:
+          src: /var/lib/rancher/k3s/server/node-token
+          # Change this path to the path where you want to store the kubeconfig file
+          dest: ./.kube/k3s_node_token
+          flat: yes
+          mode: '0777'
+
+#    - name: Get join token
+#      shell: kubeadm token create --print-join-command
+#      register: kubernetes_join_command
+#
+#    - name: Copy join command to local file.
+#      local_action: copy content="{{ kubernetes_join_command.stdout }}" dest="/tmp/kubernetes_join_command" mode=0777
+#
+#    - name: Fetch admin.conf from remote machine
+#      fetch:
+#        src: /etc/kubernetes/admin.conf
+#        dest: /tmp/.kube/config
+#        flat: yes
+#        mode: '0777'
+- name: Join worker nodes to the cluster
+  hosts: node
+  become: yes
+  tasks:
+    - name: Ensure net.ipv4.ip_forward is set to 1
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: 1
+        state: present
+        reload: yes
+
+    - name: Copy k3s node token to user's home directory
+      copy:
+        src: ./.kube/k3s_node_token
+        dest: /home/{{ ansible_user }}/k3s_node_token
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0777'
+
+    - name: Create .kube directory for admin user
+      file:
+        path: /home/{{ ansible_user }}/.kube
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+
+    - name: Copy kube config to user's home directory
+      copy:
+        src: ./.kube/config
+        dest: /home/{{ ansible_user }}/.kube/config
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0777'
+
+    - name: Stop k3s server if running
+      command: /usr/local/bin/k3s-agent-uninstall.sh
+      ignore_errors: yes
+
+
+    - name: Install k3s agent
+      environment:
+        INSTALL_K3S_FORCE_RESTART: "true"
+      shell: curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="agent --server https://192.168.56.10:6443 --node-external-ip=192.168.56.11 --node-label worker=true --flannel-iface enp0s8 --token $(cat /home/{{ ansible_user }}/k3s_node_token)" sh -
+      register: k3s_agent_output
+
+
+#    - name: Stop Kubernetes cluster if running
+#      command: kubeadm reset -f
+#
+#    - name: Copy join command from Ansible host to the worker nodes.
+#      copy:
+#        src: /tmp/kubernetes_join_command
+#        dest: /tmp/kubernetes_join_command
+#        mode: '0777'
+#
+#    - name: Join the Worker nodes to the cluster.
+#      command: sh /tmp/kubernetes_join_command
+#      register: joined_or_not
+
+#    - name: Create .kube directory for admin user
+#      file:
+#        path: /home/{{ ansible_user }}/.kube
+#        state: directory
+#        owner: "{{ ansible_user }}"
+#        group: "{{ ansible_user }}"
+#        mode: '0755'
+#
+#    - name: Copy admin.conf to user's .kube directory
+#      shell: |
+#        cp -f /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config &&
+#        chown $(id -u {{ ansible_user }}):$(id -g {{ ansible_user }}) /home/{{ ansible_user }}/.kube/config
+#

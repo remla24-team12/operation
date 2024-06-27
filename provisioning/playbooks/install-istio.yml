@@ -1,0 +1,26 @@
+- name: Install Istio
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Check if namespace exists
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      command: kubectl get namespaces istio-system
+      register: namespace_check
+      ignore_errors: yes
+
+    - name: Create a namespace for Istio
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+      command: kubectl create namespace istio-system
+      when: namespace_check.rc != 0
+
+    - name: Export KUBECONFIG
+      shell: export KUBECONFIG=/home/vagrant/.kube/config
+    - name: Download Istio to home directory
+      shell: curl -L https://istio.io/downloadIstio | sh -
+    - name: Install Istio ctl
+      shell: /home/vagrant/istio-1.22.1/bin/istioctl install -c /home/vagrant/.kube/config -y --set profile=demo
+
+    - name: Enable Istio sidecar injection
+      command: kubectl label namespace default istio-injection=enabled --overwrite

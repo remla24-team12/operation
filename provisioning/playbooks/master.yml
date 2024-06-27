@@ -1,0 +1,38 @@
+---
+- name: Setup Kubernetes cluster
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - conntrack
+        state: present
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker group exists
+      group:
+        name: docker
+        state: present
+
+    - name: Add vagrant user to the Docker group
+      user:
+        name: vagrant
+        groups: docker
+        append: yes
+
+
+
+
+

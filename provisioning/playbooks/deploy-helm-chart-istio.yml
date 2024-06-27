@@ -1,0 +1,9 @@
+---
+- name: Deploy helm chart
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Deploy application using Helm
+      shell: helm upgrade --install myapp-release /vagrant/remla-istio --set service.type=NodePort,service.nodePort=30007 --kubeconfig=/etc/rancher/k3s/k3s.yaml
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml

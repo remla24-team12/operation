@@ -195,6 +195,13 @@ https://github.com/remla24-team12/operation/pull/11
 
 Approved PRs:
 
+### Nicolae:
+Created PRs:
+https://github.com/remla24-team12/operation/pull/10#
+
+Approved PRs:
+https://github.com/remla24-team12/operation/pull/8
+
 ### Kris
 Created PRs:
 https://github.com/remla24-team12/operation/pull/13#pullrequestreview-2146490953 
