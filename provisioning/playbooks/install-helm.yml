@@ -26,8 +26,19 @@
     - name: Update Helm repositories
       command: helm repo update
 
+    - name: Check if NGINX Ingress Controller is installed
+      shell: helm list --kubeconfig /etc/rancher/k3s/k3s.yaml --filter 'nginx-ingress' -n default --short
+      register: nginx_ingress_installed
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Set fact for NGINX Ingress installation status
+      set_fact:
+        nginx_ingress_exists: "{{ 'nginx-ingress' in nginx_ingress_installed.stdout }}"
+
     - name: Install NGINX Ingress Controller using Helm
       shell: helm install nginx-ingress ingress-nginx/ingress-nginx --kubeconfig /etc/rancher/k3s/k3s.yaml
+      when: not nginx_ingress_exists
 
     - name: Ensure Prometheus is not already installed
       shell: |
@@ -37,12 +48,19 @@
     - name: Install Prometheus
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      command: helm upgrade -i prometheus prometheus-community/prometheus --set server.service.type=NodePort --set server.service.port=9090
+      command: >
+        helm upgrade -i prometheus prometheus-community/prometheus
+        --set server.service.type=NodePort
+        --set server.service.nodePort=30090
+        --set server.service.port=9090
+        --set server.global.scrape_interval=15s
+        --set server.web.route-prefix=/prometheus
+        --set server.web.external-url=http://192.168.56.10/prometheus
 
     - name: Install Grafana
       environment:
         KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-      command: helm upgrade -i grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.port=3000 --set grafana.grafana.ini.server.root_url='http://192.168.56.10/grafana' --set grafana.grafana.ini.server.serve_from_sub_path=true
+      command: helm upgrade -i grafana grafana/grafana --set service.type=NodePort --set adminPassword='admin' --set service.nodePort=30300 --set service.port=3000 --set grafana.grafana.ini.server.root_url='http://192.168.56.10/grafana' --set grafana.grafana.ini.server.serve_from_sub_path=true
 
     - name: Install Kubernetes Dashboard
       environment:

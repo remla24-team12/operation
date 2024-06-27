@@ -5,8 +5,8 @@ Vagrant.configure("2") do |config|
     config.ssh.insert_key = true
 
     config.vm.provider "virtualbox" do |v|
-        v.memory = 4048
-        v.cpus = 2
+        v.memory = 3000
+        v.cpus = 1
     end
 
     config.vm.define "controller-1" do |master|

@@ -30,3 +30,24 @@ spec:
             name: model-service
             port:
               number: 5000
+      - path: /prometheus/()(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus-server
+            port:
+              number: 80
+      - path: /grafana/()(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000
+      - path: /dashboard/()(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: kubernetes-dashboard-web
+            port:
+              number: 8000
