@@ -21,8 +21,6 @@ spec:
         env:
           - name: MODEL_SERVICE_URL
             value: "http://192.168.56.10/model"
-      nodeSelector:
-        kubernetes.io/hostname: node-1
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -49,8 +47,6 @@ spec:
             value: "/frontend/"
           - name: VUE_APP_API_URL
             value: "http://192.168.56.10/backend"
-      nodeSelector:
-        kubernetes.io/hostname: node-3
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -72,5 +68,3 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 5000
-      nodeSelector:
-        kubernetes.io/hostname: node-2

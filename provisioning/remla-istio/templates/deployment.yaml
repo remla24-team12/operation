@@ -1,0 +1,122 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-frontend-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-frontend
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: app-frontend
+        version: v1
+    spec:
+      containers:
+        - name: app-frontend
+          image: ghcr.io/remla24-team12/frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: VUE_APP_API_URL
+              value: "http://192.168.56.10"
+            - name: VUE_APP_PUBLIC_PATH
+              value: "/app"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-frontend-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-frontend
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: app-frontend
+        version: v2
+    spec:
+      containers:
+        - name: app-frontend
+          image: ghcr.io/remla24-team12/frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: VUE_APP_API_URL
+              value: "http://192.168.56.10"
+            - name: VUE_APP_PUBLIC_PATH
+              value: "/app"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+          app: app-service
+    template:
+        metadata:
+          labels:
+              app: app-service
+        spec:
+          containers:
+              - name: app-service
+                image: ghcr.io/remla24-team12/backend:latest
+                imagePullPolicy: Always
+                ports:
+                    - containerPort: 3000
+                env:
+                  - name: MODEL_SERVICE_URL
+                    value: "http://model-service:5000"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: model-service
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: model-service
+    template:
+        metadata:
+            labels:
+                app: model-service
+        spec:
+            containers:
+                - name: model-service
+                  image: ghcr.io/remla24-team12/model-service:latest
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:6.2
+        ports:
+        - containerPort: 6379

@@ -1,0 +1,26 @@
+---
+- name: Deploy helm chart
+  hosts: controller
+  become: yes
+  tasks:
+    - name: Add NGINX Ingress repository
+      command: helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+      
+    - name: Check if NGINX Ingress Controller is installed
+      shell: helm list --kubeconfig /etc/rancher/k3s/k3s.yaml --filter 'nginx-ingress' -n default --short
+      register: nginx_ingress_installed
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Set fact for NGINX Ingress installation status
+      set_fact:
+        nginx_ingress_exists: "{{ 'nginx-ingress' in nginx_ingress_installed.stdout }}"
+
+    - name: Install NGINX Ingress Controller using Helm
+      shell: helm install nginx-ingress ingress-nginx/ingress-nginx --kubeconfig /etc/rancher/k3s/k3s.yaml
+      when: not nginx_ingress_exists
+
+    - name: Deploy application using Helm
+      shell: helm upgrade --install myapp-release /vagrant/remla-ingress --set service.type=NodePort,service.nodePort=30007 --kubeconfig=/etc/rancher/k3s/k3s.yaml
+      environment:
+        KUBECONFIG: /etc/rancher/k3s/k3s.yaml
