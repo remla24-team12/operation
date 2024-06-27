@@ -37,6 +37,29 @@ To set the kubectl context, run the following command:
 export KUBECONFIG=/tmp/.kube/config
 ```
 
+## Install istio
+To install istio, run the following command:
+```bash
+ansible-playbook -i provisioning/hosts provisioning/playbooks/install-istio.yml
+```
+
+## Deploy the application
+To deploy the application, run the following command:
+```bash
+kubectl apply -f kubernetes/app-deployment.yml
+```
+
+## Deploy istio gateway
+To deploy the istio gateway, run the following command:
+```bash
+kubectl apply -f kubernetes/istio-gateway.yml
+```
+
+## To deploy the ratelimiter
+To deploy the ratelimiter, run the following command:
+```bash
+kubectl apply -f kubernetes/ratelimiter.yml
+```
 
 # Links to other repositories:
 For creating our application we decided to stick to the architecture proposed in the assignment:
