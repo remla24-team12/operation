@@ -1,0 +1,29 @@
+\section{Istio}
+We have implemented Istio as a gateway service for our application. This setup allows us to manage multiple domains and endpoints, ensuring that requests are correctly routed to the appropriate services within our Kubernetes cluster. Additionally, Istio provides capabilities for advanced traffic management, such as A/B testing and rate limiting, among other features.
+
+\subsection{Rate Limiting} % replace if we decide to implement another use case
+% • General description of the use case.
+% • The changes compared to the base design in the Deployment section.
+To prevent users from overusing our application or deploying bots to exploit our services, we have implemented rate limiting using Istio. This ensures that all traffic routed through the ingress gateway is controlled, maintaining fair usage and accessibility for all users. The rate limiting is achieved through an EnvoyFilter, which effectively limits the number of requests a user can make within a specified timeframe, protecting our services from abuse and ensuring optimal performance for all legitimate users.
+
+% \subsection{Experiment}
+% % • General description of the experiment.
+% % • The changes compared to the base design in the Deployment section.
+% % • The hypothesis that is tested in the experiment.
+% % • The relevant metrics, i.e., what is being measured and how this is achieved.
+% % • A description of the decision process. More concretely, which data will be available (e.g., a Grafana screenshot) and how it will be used to derive a decision/answer regarding the hypothesis.
+% With the implementation of rate limiting, we are curious about the impact of rate limiting on the performance of the API. Therefore we set up an experiment comparing it to the regular deployment without this feature. More specifically, we measure the response times and CPU usage of both APIs under various load conditions. \\
+% % Tools used to conduct experiments:
+
+% \subsubsection{Hypothesis:} As the load becomes too much for the APIs to process, the rate limiting will cause requests to be rejected. The requests that are not rejected, will be processed timely, which does not happen for the normal API. This will also reduce the amount of CPU used.
+
+% \subsubsection{Baseline:} Run tests with a low number of requests to establish baseline performance.
+% % Results baseline
+
+% \subsubsection{Experiment1 - High Load:} Run tests with a constant high number of requests to test long-term effects.
+% % Results experiment 1
+
+% \subsubsection{Experiment2 - Bursts:} Run tests with burst of high load to test real-world scenario.
+% % Results experiment 2
+
+% % Experiment conclusion

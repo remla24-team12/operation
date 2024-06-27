@@ -1,0 +1,46 @@
+\documentclass[sigconf,nonacm]{acmart}
+
+% meta-data -- adjust to meaningful values
+\title{Project Report -- Group 12}
+\author{Kris van Melis, Nicolae Rusnac, Reinout Vos, Bram de Vries}
+
+% remove overhead that is used in regular ACM papers
+\settopmatter{printacmref=false} % box after abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % copyright on first page
+\pagestyle{plain} % running headers
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+% IMPORTANT: Report Knock-out Criteria:
+% • The report follows the formatting guidelines.
+% • The report follows the expected structure.
+% • The report contains elaborated text and balances the content between the different parts.
+% • The language quality is high and it is easy to read and follow the report.
+
+% Each section has a corresponding file in the 'contents' folder
+\input{content/introduction}
+\input{content/pipelines}
+\input{content/deployment}
+\input{content/project_state}
+\input{content/istio}
+\input{content/ml_pipeline}
+\input{content/ml_tests}
+
+% Maybe include separate discussion section:
+% discussion of limitations, opportunities, and lessons learned, but it could be more reflective
+
+
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}
+\endinput

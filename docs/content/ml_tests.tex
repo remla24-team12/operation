@@ -1,0 +1,27 @@
+% As part of the assignment on ML Testing, you had to design a testing strategy and implement
+% some automated tests. In this section, we expect you to fully document your choices and to reflect on limitations of the existing testing strategy. Moreover, we would like to hear your thoughts on how to improve tests, which new tests should be implemented and why.
+
+\section{ML Testing Design}
+In order to verify our entire systems functions correctly, reliably and effectively, we have set up an extensive Continuous Integration (CI) pipeline. The following subsections will elaborate on the testing and benchmark steps, test adequacy metrics and future improvements.
+
+\subsection{Test Strategy}
+Our testing strategy was guided by the paper \textit{What’s your ML Test Score? A rubric for ML production systems} \cite{mltestscore}. Four main aspects of ML testing are outlined, as well as a system of computing an ML test score. We have implemented the following tests based on these aspects:
+
+\subsubsection{Tests for Features and Data:} Since the behaviour of ML systems learned from data, it is important to verify that the data delivered and handled as expected. We have implemented tests to verify that all steps in the DVC pipeline create correct output files. Additionally, the input features are checked for duplicate data.
+
+\subsubsection{Tests for Model Development:} This testing aspect is not covered by explicit tests, but by how we have set up our testing suite. The paper recommends testing against a much simpler model as a baseline so the functionality of the whole pipeline can be quickly confirmed. Section \ref{sec:ml-tests:pipeline} elaborates more on this.
+
+\subsubsection{Tests for ML Infrastructure:} To test the ML infrastructure, we are testing the reproducibility of training the model. The model is trained two times on the same data, but with different seeds. We can detect non-determinism when the accuracy of these models differs more than a threshold.
+
+\subsubsection{Monitoring Tests for ML:} To monitor how our ML pipeline performs, we have implemented a benchmark using 
+{\color{blue} \href{https://pypi.org/project/pytest-benchmark/}{PyTest Benchmark}}. Paired with the GitHub Action {\color{blue} \href{https://github.com/benchmark-action/github-action-benchmark/tree/master}{github-action-benchmark}}, the performance of training the model is automatically measured and compared to previous runs. If the change is too drastic, the pipeline will raise an error.
+
+\subsection{Test Adequacy}
+As highlighted by Zhang et al. \cite{zhang2019machine} a proper ML testing strategy covers a lot more aspects than the test score. As such, another important 'angle' is adequacy: "Test adequacy criteria are used to provide quantitative measurement on the degree of the target software that has been tested." \cite{zhang2019machine}. \\
+The first criterion described in the same paper is neuron coverage. This metric is computed as the number of unique neurons activated by all test inputs over the total number of neurons in a network. The resulting percentage can provide useful insight about the training strategy of the model, as a low score indicates many neurons in the network are not contribution and may be pruned for example.
+For our {\color{blue} \href{https://github.com/remla24-team12/model-training/blob/main/tests/adequacy/test_neuron_coverage.py}{implementation}} the number of neurons is determined by the convolutional and feed forward layers.
+
+\subsection{Improvements}
+A single adequacy metric alone is quite limited for a thorough adequacy report. In our view, by implementing the neuron coverage we created a solid foundation to which more adequacy criteria should be added in the future.  \\
+Furthermore, we did not implement mutamorphic testing to further test the robustness and reliability of our model. We can create mutations of data samples, now if the test between these mutations and the original samples is very different, we know we have to make changes to the model to improve its robustness. Additionally, we can use mutations to repair inconsistencies in the data. \\
+Finally we want to add tests more tests regarding for example irrelevance of the model. Meaning that it should ignore parts of the URL which are less relevant such as the 'http(s)://' sequence. Another test case is the impacts of hyperparameters. Parameters like the dropout ratio and learning rate (which is set to default 0.001) are currently hard-coded. Firstly, we should make them variable. Afterwards, we want to experiment with different values, in order to measure their impact.

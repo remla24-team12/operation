@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   app-frontend:
     image: ghcr.io/remla24-team12/frontend:latest
@@ -21,7 +20,7 @@ services:
       - MODEL_SERVICE_URL=http://localhost:5000/
 
   model-service:
-    image: ghcr.io/remla24-team12/model-service:latest
+    image: ghcr.io/remla24-team12/model-service:v0.1.53
     ports:
       - "5000:5000"
 
