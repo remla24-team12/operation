@@ -1,0 +1,292 @@
+{
+    "annotations": {
+      "list": []
+    },
+    "editable": true,
+    "gnetId": null,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "panels": [{
+        "type": "histogram",
+        "title": "Histogram for requests by response time",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        },
+        "datasource": {
+          "uid": "bdq26dhxbb2f4f",
+          "type": "prometheus"
+        },
+        "id": 3,
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "bdq26dhxbb2f4f"
+            },
+            "refId": "A",
+            "expr": "sum by(le) (rate(backend_response_times_histogram_count[5m]))",
+            "range": true,
+            "instant": false,
+            "editorMode": "builder",
+            "legendFormat": "__auto",
+            "useBackend": false,
+            "disableTextWrap": false,
+            "fullMetaSearch": false,
+            "includeNullMetadata": false
+          }
+        ],
+        "options": {
+          "legend": {
+            "showLegend": true,
+            "displayMode": "list",
+            "placement": "bottom",
+            "calcs": []
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "stacking": {
+                "mode": "none",
+                "group": "A"
+              },
+              "lineWidth": 1,
+              "fillOpacity": 80,
+              "gradientMode": "none",
+              "hideFrom": {
+                "tooltip": false,
+                "viz": false,
+                "legend": false
+              }
+            },
+            "color": {
+              "mode": "palette-classic"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                },
+                {
+                  "value": 80,
+                  "color": "red"
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "pluginVersion": "11.0.0",
+        "transformations": [
+          {
+            "id": "filterFieldsByName",
+            "options": {}
+          }
+        ]
+      },{
+        "type": "stat",
+        "title": "Average ram consumption over time in the backend",
+        "gridPos": {
+          "x": 0,
+          "y": 8,
+          "w": 12,
+          "h": 8
+        },
+        "datasource": {
+          "uid": "bdq26dhxbb2f4f",
+          "type": "prometheus"
+        },
+        "id": 2,
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "avg(backend_available_ram_bytes)",
+            "range": true,
+            "instant": false,
+            "datasource": {
+              "type": "prometheus",
+              "uid": "bdq26dhxbb2f4f"
+            },
+            "editorMode": "builder",
+            "legendFormat": "__auto",
+            "useBackend": false,
+            "disableTextWrap": false,
+            "fullMetaSearch": false,
+            "includeNullMetadata": true
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": ""
+          },
+          "orientation": "auto",
+          "textMode": "auto",
+          "wideLayout": true,
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "showPercentChange": false
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "value": null,
+                  "color": "green"
+                },
+                {
+                  "value": 80,
+                  "color": "red"
+                }
+              ]
+            },
+            "color": {
+              "mode": "thresholds"
+            }
+          },
+          "overrides": []
+        },
+        "pluginVersion": "11.0.0"
+      },
+      {
+        "type": "piechart",
+        "title": "Response status 200 vs 400",
+        "gridPos": {
+          "x": 0,
+          "y": 16,
+          "w": 12,
+          "h": 8
+        },
+        "datasource": {
+          "uid": "bdq26dhxbb2f4f",
+          "type": "prometheus"
+        },
+        "id": 1,
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "bdq26dhxbb2f4f"
+            },
+            "refId": "Status 200",
+            "expr": "backend_total_responses{status=\"200\"}",
+            "range": true,
+            "instant": false,
+            "editorMode": "builder",
+            "legendFormat": "__auto",
+            "useBackend": false,
+            "disableTextWrap": false,
+            "fullMetaSearch": false,
+            "includeNullMetadata": true
+          },
+          {
+            "datasource": {
+              "uid": "bdq26dhxbb2f4f",
+              "type": "prometheus"
+            },
+            "refId": "Status 404",
+            "expr": "backend_total_responses{status=\"404\"}",
+            "range": true,
+            "instant": false,
+            "hide": false,
+            "editorMode": "builder",
+            "legendFormat": "__auto",
+            "useBackend": false,
+            "disableTextWrap": false,
+            "fullMetaSearch": false,
+            "includeNullMetadata": true
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": ""
+          },
+          "pieType": "pie",
+          "tooltip": {
+            "mode": "single",
+            "sort": "none",
+            "maxHeight": 600
+          },
+          "legend": {
+            "showLegend": true,
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        },
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "hideFrom": {
+                "tooltip": false,
+                "viz": false,
+                "legend": false
+              }
+            },
+            "color": {
+              "mode": "palette-classic"
+            },
+            "mappings": []
+          },
+          "overrides": []
+        }
+      }
+    ],
+    "schemaVersion": 27,
+    "style": "dark",
+    "tags": [],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "5s",
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
+      "time_options": [
+        "5m",
+        "15m",
+        "1h",
+        "6h",
+        "12h",
+        "24h",
+        "2d",
+        "7d",
+        "30d"
+      ]
+    },
+    "timezone": "",
+    "title": "New Dashboard",
+    "uid": null,
+    "version": 1
+  }
+  

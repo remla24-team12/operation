@@ -6,6 +6,9 @@ services:
       - "8080:8080"
     depends_on:
       - app-service
+    environment:
+      - NODE_ENV=development
+      - APP_API_URL=http://localhost:3000
 
   app-service:
     image: ghcr.io/remla24-team12/backend:latest
@@ -13,6 +16,9 @@ services:
       - "3000:3000"
     depends_on:
       - model-service
+    environment:
+      - NODE_ENV=development
+      - MODEL_SERVICE_URL=http://localhost:5000/
 
   model-service:
     image: ghcr.io/remla24-team12/model-service:latest
